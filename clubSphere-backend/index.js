@@ -1,0 +1,41 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+ 
+const app = express();
+const db = require('./src/config/db');
+ 
+app.use(cors());
+app.use(express.json());
+ 
+// ── Routes ──────────────────────────────────────────
+const authRoutes         = require('./src/routes/auth.routes');
+const clubRoutes         = require('./src/routes/clubs.routes');
+const applicationRoutes  = require('./src/routes/applications.routes');
+const managerRoutes      = require('./src/routes/manager.routes');
+const eventRoutes        = require('./src/routes/Events.routes');
+const notificationRoutes = require('./src/routes/Notifications.routes');
+ 
+app.use('/api/auth',          authRoutes);
+app.use('/api/clubs',         clubRoutes);
+app.use('/api/applications',  applicationRoutes);
+app.use('/api/manager',       managerRoutes);
+app.use('/api/events',        eventRoutes);
+app.use('/api/notifications', notificationRoutes);
+ 
+// ── Health checks ────────────────────────────────────
+app.get('/', (req, res) => res.send('ClubSphere API Running 🚀'));
+ 
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await db.query('SELECT NOW()');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('DB Error');
+  }
+});
+ 
+// ── Start ────────────────────────────────────────────
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT} 🚀`));
