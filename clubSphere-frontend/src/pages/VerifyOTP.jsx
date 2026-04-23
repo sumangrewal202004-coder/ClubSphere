@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../api/axios';
-
+import { useAuth } from '../context/AuthContext';
+console.log('VerifyOTP module loaded');
 export default function VerifyOTP() {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
@@ -12,17 +13,14 @@ export default function VerifyOTP() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { loginUser } = useAuth();
 
   const email = location.state?.email || localStorage.getItem('otp_email');
 
-  // Redirect back if no email found
   useEffect(() => {
-    if (!email) {
-      navigate('/login');
-    }
+    if (!email) navigate('/login');
   }, [email, navigate]);
 
-  // Countdown timer for resend button
   useEffect(() => {
     if (countdown <= 0) return;
     const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
@@ -35,17 +33,20 @@ export default function VerifyOTP() {
     setLoading(true);
 
     try {
+      console.log('Verifying OTP for email:', email);
       const res = await api.post('/auth/verify-otp', { email, otp });
+      console.log('OTP verification response:', res.data);
 
-      // Save auth data
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.role);
+      // Update context AND localStorage together — fixes the race condition
+      loginUser(res.data.token, res.data.role);
       localStorage.removeItem('otp_email');
 
-      // Role-based redirect
+      console.log('Navigating to dashboard for role:', res.data.role);
       switch (res.data.role) {
         case 'super_admin':
+          console.log('Calling navigate("/admin/dashboard")');
           navigate('/admin/dashboard');
+          console.log('navigate() called, checking current location');
           break;
         case 'student':
           navigate('/student/clubs');
@@ -71,12 +72,11 @@ export default function VerifyOTP() {
     setResending(true);
     setError('');
     setResendSuccess(false);
-
     try {
       await api.post('/auth/send-otp', { email });
       setResendSuccess(true);
-      setCountdown(60); // reset timer
-      setOtp('');       // clear old OTP input
+      setCountdown(60);
+      setOtp('');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to resend OTP');
     } finally {
@@ -88,7 +88,6 @@ export default function VerifyOTP() {
     <div className="min-h-screen bg-linear-to-br from-indigo-50 to-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
             Club<span className="text-indigo-600">Sphere</span>
@@ -98,7 +97,6 @@ export default function VerifyOTP() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
 
-          {/* Email indicator */}
           <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 mb-6">
             <svg className="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -109,7 +107,6 @@ export default function VerifyOTP() {
             </p>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="mb-5 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl flex items-start gap-2">
               <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +117,6 @@ export default function VerifyOTP() {
             </div>
           )}
 
-          {/* Resend success */}
           {resendSuccess && (
             <div className="mb-5 p-3 bg-green-50 border border-green-100 text-green-700 text-sm rounded-xl flex items-center gap-2">
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,16 +136,14 @@ export default function VerifyOTP() {
                 required
                 maxLength={6}
                 value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))} // numbers only
+                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-center
                            text-2xl font-bold tracking-[0.5em] text-gray-800
                            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
                            placeholder:text-gray-200 placeholder:text-base placeholder:tracking-normal transition"
                 placeholder="······"
               />
-              <p className="text-xs text-gray-400 mt-1.5 text-center">
-                OTP expires in 5 minutes
-              </p>
+              <p className="text-xs text-gray-400 mt-1.5 text-center">OTP expires in 5 minutes</p>
             </div>
 
             <button
@@ -163,7 +157,6 @@ export default function VerifyOTP() {
             </button>
           </form>
 
-          {/* Resend OTP */}
           <div className="mt-5 text-center">
             {countdown > 0 ? (
               <p className="text-sm text-gray-400">
@@ -181,12 +174,8 @@ export default function VerifyOTP() {
             )}
           </div>
 
-          {/* Back to login */}
           <div className="mt-4 text-center">
-            <Link
-              to="/login"
-              className="text-sm text-gray-400 hover:text-gray-600 transition"
-            >
+            <Link to="/login" className="text-sm text-gray-400 hover:text-gray-600 transition">
               ← Back to login
             </Link>
           </div>

@@ -14,11 +14,14 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: 'Name, email and role are required' });
     }
 
+    if (role === 'super_admin') {
+      return res.status(403).json({ error: 'Cannot register as super_admin' });
+    }
+
     if (role !== 'college' && (!password || password.length < 6)) {
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
     }
 
-    // Check email already registered
     const existing = await db.query(
       `SELECT id FROM users WHERE email=$1`, [email]
     );
@@ -28,7 +31,6 @@ exports.register = async (req, res) => {
 
     let collegeId = null;
 
-    // Student must belong to an approved college by email domain
     if (role === 'student') {
       const domain = email.split('@')[1];
 
@@ -78,7 +80,6 @@ exports.sendOtp = async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Check user exists
     const userResult = await db.query(
       `SELECT id, role, email FROM users WHERE email=$1`, [email]
     );
@@ -89,8 +90,11 @@ exports.sendOtp = async (req, res) => {
       return res.status(404).json({ error: 'No account found with this email' });
     }
 
-    // Student college approval check
-    if (user.role === 'student') {
+    // super_admin: skip all college checks
+    if (user.role === 'super_admin') {
+      // fall through to OTP generation
+    }
+    else if (user.role === 'student') {
       const domain = email.split('@')[1];
       const college = await db.query(
         `SELECT status FROM colleges WHERE domain=$1`, [domain]
@@ -102,9 +106,7 @@ exports.sendOtp = async (req, res) => {
         return res.status(403).json({ error: 'Your college is not approved yet' });
       }
     }
-
-    // College approval check
-    if (user.role === 'college') {
+    else if (user.role === 'college') {
       const college = await db.query(
         `SELECT status FROM colleges WHERE email=$1`, [email]
       );
@@ -116,23 +118,18 @@ exports.sendOtp = async (req, res) => {
       }
     }
 
-    // Generate OTP
     const otp = generateOTP();
 
-    // Delete any existing OTP for this email
     await db.query(`DELETE FROM otp_table WHERE email=$1`, [email]);
 
-    // Save new OTP with 5 min expiry
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
     await db.query(
       `INSERT INTO otp_table (email, otp, expires_at) VALUES ($1, $2, $3)`,
       [email, otp, expiresAt]
     );
 
-    // Always log OTP to console (useful during development)
     console.log(`\n✅ OTP for ${email}: ${otp}\n`);
 
-    // Send email
     const recipient = process.env.DEV_MODE === 'true'
       ? process.env.DEV_EMAIL
       : email;
@@ -158,7 +155,6 @@ exports.sendOtp = async (req, res) => {
       console.log('Email sent to:', recipient);
     } catch (mailErr) {
       console.error('Mail send failed:', mailErr.message);
-      // Don't block login if mail fails — OTP is still in console
     }
 
     res.json({ message: 'OTP sent to your email' });
@@ -179,7 +175,6 @@ exports.verifyLoginOTP = async (req, res) => {
       return res.status(400).json({ error: 'Email and OTP are required' });
     }
 
-    // Find OTP record
     const otpCheck = await db.query(
       `SELECT * FROM otp_table WHERE email=$1 AND otp=$2`,
       [email, otp.toString()]
@@ -191,16 +186,13 @@ exports.verifyLoginOTP = async (req, res) => {
 
     const otpData = otpCheck.rows[0];
 
-    // Check expiry
     if (new Date() > new Date(otpData.expires_at)) {
       await db.query(`DELETE FROM otp_table WHERE email=$1`, [email]);
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
     }
 
-    // Delete OTP so it cannot be reused
     await db.query(`DELETE FROM otp_table WHERE email=$1`, [email]);
 
-    // Get user
     const userResult = await db.query(
       `SELECT id, role, name, email, college_id FROM users WHERE email=$1`,
       [email]
@@ -212,7 +204,6 @@ exports.verifyLoginOTP = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Generate JWT
     const token = jwt.sign(
       { id: user.id, role: user.role, college_id: user.college_id },
       process.env.JWT_SECRET,

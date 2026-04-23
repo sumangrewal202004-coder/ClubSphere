@@ -8,12 +8,12 @@ const {
 } = require('../controllers/notifications.controller');
  
 // Any logged-in user can get their notifications
-router.get('/', auth(['student', 'club_manager', 'college']), getNotifications);
+router.get('/', auth(['super_admin', 'student', 'club_manager', 'college']), getNotifications);
  
 // Mark one notification as read
-router.patch('/:id/read', auth(['student', 'club_manager', 'college']), markAsRead);
+router.patch('/:id/read', auth(['super_admin', 'student', 'club_manager', 'college']), markAsRead);
  
 // Mark all as read
-router.patch('/read-all', auth(['student', 'club_manager', 'college']), markAllAsRead);
+router.patch('/read-all', auth(['super_admin', 'student', 'club_manager', 'college']), markAllAsRead);
  
 module.exports = router;

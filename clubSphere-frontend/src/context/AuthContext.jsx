@@ -5,7 +5,7 @@ import api from '../api/axios';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { token, role }
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -16,20 +16,13 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('role', res.data.role);
-    setUser({ token: res.data.token, role: res.data.role });
-    // Redirect based on role
-    if (res.data.role === 'college') navigate('/college/dashboard');
-    else if (res.data.role === 'club_manager') navigate('/manager/dashboard');
-    else navigate('/student/clubs');
-  };
-
-  const register = async (data) => {
-    await api.post('/auth/register', data);
-    navigate('/login');
+  // Call this after OTP verify to update context immediately
+  const loginUser = (token, role) => {
+    console.log('AuthContext: loginUser called with role:', role);
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', role);
+    setUser({ token, role });
+    console.log('AuthContext: user state updated to:', { token, role });
   };
 
   const logout = () => {
@@ -40,7 +33,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, loginUser, logout, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -15,7 +15,7 @@ const applicationRoutes  = require('./src/routes/applications.routes');
 const managerRoutes      = require('./src/routes/manager.routes');
 const eventRoutes        = require('./src/routes/Events.routes');
 const notificationRoutes = require('./src/routes/Notifications.routes');
- const collegeRoutes = require('./src/routes/college.routes');
+const collegeRoutes = require('./src/routes/college.routes');
 const adminRoutes = require('./src/routes/admin.routes');
 const otpRoutes = require('./src/routes/otp.routes');
 app.use('/api/otp', otpRoutes);
@@ -25,9 +25,6 @@ app.use('/api/applications',  applicationRoutes);
 app.use('/api/manager',       managerRoutes);
 app.use('/api/events',        eventRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/admin', require('./src/routes/admin.routes')); 
-
-
 app.use('/api/colleges', collegeRoutes);
 app.use('/api/admin', adminRoutes);
 // ── Health checks ────────────────────────────────────

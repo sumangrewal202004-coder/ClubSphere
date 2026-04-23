@@ -2,9 +2,9 @@ CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  role TEXT CHECK (role IN ('college', 'club_manager', 'student')) NOT NULL,
+  role TEXT CHECK (role IN ('super_admin', 'college', 'club_manager', 'student')) NOT NULL,
   name TEXT,
-  college_id UUID REFERENCES users(id),
+  college_id UUID REFERENCES colleges(id),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

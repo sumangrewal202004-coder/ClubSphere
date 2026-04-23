@@ -17,6 +17,9 @@ export default function Navbar() {
   }, [user]);
 
   const links = {
+    super_admin: [
+      { to: '/admin/dashboard', label: 'Dashboard' },
+    ],
     college: [
       { to: '/college/dashboard', label: 'Dashboard' },
       { to: '/college/create-club', label: 'Create Club' },
