@@ -6,7 +6,19 @@ const { scoreCV } = require('../services/aiScoring');
 // APPLY TO CLUB
 exports.applyToClub = async (req, res) => {
   const { clubId } = req.body;
- 
+ const club = await db.query(
+  `SELECT * FROM clubs WHERE id=$1`,
+  [clubId]
+);
+
+if (!club.rows.length) {
+  return res.status(404).json({ error: 'Club not found' });
+}
+
+// 🚨 SECURITY CHECK
+if (club.rows[0].college_id !== req.user.college_id) {
+  return res.status(403).json({ error: 'You cannot apply to this club' });
+}
   try {
     if (!req.file) return res.status(400).json({ error: 'CV is required' });
     if (!clubId) return res.status(400).json({ error: 'clubId is required' });

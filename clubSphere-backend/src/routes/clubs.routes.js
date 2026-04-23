@@ -6,7 +6,7 @@ const {
   getClubs,
   getMyCollegeClubs,
   getClubById
-} = require('../controllers/clubs.controller');
+} = require('../controllers/club.controller');
  
 // College creates a club (optionally assigns a manager by email)
 router.post('/', auth(['college']), createClub);

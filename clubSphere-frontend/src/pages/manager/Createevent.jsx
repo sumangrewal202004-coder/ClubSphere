@@ -26,7 +26,9 @@ export default function CreateEvent() {
       })
       .catch(console.error);
   }, []);
-
+if (!form.clubId) {
+  return setError('Please select a club');
+}
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
