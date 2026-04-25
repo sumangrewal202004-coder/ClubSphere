@@ -4,7 +4,7 @@ const router = express.Router();
 const upload = require('../middleware/uploadDocuments');
 const { registerCollege } = require('../controllers/college.controller');
 
-// register college with documents
-router.post('/register', upload.array('documents', 5), registerCollege);
+// Register college — accept up to 10 documents
+router.post('/register', upload.array('documents', 10), registerCollege);
 
 module.exports = router;

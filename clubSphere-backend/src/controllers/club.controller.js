@@ -5,6 +5,14 @@ exports.createClub = async (req, res) => {
   const { name, description, requirements, manager_email } = req.body;
 
   try {
+    if (!name || !description) {
+      return res.status(400).json({ error: 'Name and description are required' });
+    }
+
+    // For now, clubs.college_id schema references users(id) instead of colleges(id)
+    // So we store the college user's ID there (workaround for schema bug)
+    let collegeId = req.user.id;
+
     let managerId = req.user.id; // fallback
 
     if (manager_email) {
@@ -28,7 +36,7 @@ exports.createClub = async (req, res) => {
         name,
         description,
         requirements,
-        req.user.college_id,   // 🔥 FIXED
+        collegeId,
         managerId
       ]
     );
@@ -36,25 +44,34 @@ exports.createClub = async (req, res) => {
     res.json(result.rows[0]);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to create club' });
+    console.error('Create club error:', err);
+    res.status(500).json({ error: 'Failed to create club: ' + err.message });
   }
 };
  
-// GET ALL CLUBS — for students to browse
+// GET ALL CLUBS — for students to browse (filtered by college)
 exports.getClubs = async (req, res) => {
   try {
-    const result = await db.query(
-      `SELECT 
-        c.id, c.name, c.description, c.requirements, c.created_at,
-        col.name AS college_name
-       FROM clubs c
-       JOIN colleges col ON c.college_id = col.id
-       WHERE c.college_id = $1
-       ORDER BY c.created_at DESC`,
-      [req.user.college_id]   // 🔥 FIXED
-    );
+    // clubs.college_id currently stores the college user's ID (schema bug workaround)
+    // For college users, filter by their ID. For others, get all clubs.
+    let whereClause = '';
+    let params = [];
 
+    if (req.user.role === 'college') {
+      whereClause = ' WHERE c.college_id = $1';
+      params = [req.user.id];
+    }
+
+    const query = `
+      SELECT 
+        c.id, c.name, c.description, c.requirements, c.created_at,
+        u.name AS college_name, u.email AS college_email
+       FROM clubs c
+       LEFT JOIN users u ON c.college_id = u.id
+       ${whereClause}
+       ORDER BY c.created_at DESC`;
+
+    const result = await db.query(query, params);
     res.json(result.rows);
 
   } catch (err) {
@@ -62,9 +79,11 @@ exports.getClubs = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch clubs' });
   }
 };
+
 // GET CLUBS BELONGING TO THIS COLLEGE
 exports.getMyCollegeClubs = async (req, res) => {
   try {
+    // clubs.college_id stores the college user's ID (schema bug workaround)
     const result = await db.query(
       `SELECT 
         c.id, c.name, c.description, c.requirements, c.created_at,
@@ -77,7 +96,7 @@ exports.getMyCollegeClubs = async (req, res) => {
        WHERE c.college_id = $1
        GROUP BY c.id, u.name, u.email
        ORDER BY c.created_at DESC`,
-      [req.user.college_id]   // 🔥 FIXED
+      [req.user.id]
     );
 
     res.json(result.rows);
@@ -97,8 +116,8 @@ exports.getClubById = async (req, res) => {
       `SELECT c.*, col.name AS college_name
        FROM clubs c
        JOIN colleges col ON c.college_id = col.id
-       WHERE c.id = $1 AND c.college_id = $2`,
-      [id, req.user.college_id]   // 🔥 SECURITY FIX
+       WHERE c.id = $1`,
+      [id]
     );
 
     if (result.rows.length === 0) {

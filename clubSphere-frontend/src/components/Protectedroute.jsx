@@ -17,6 +17,14 @@ export default function ProtectedRoute({ children, roles }) {
   console.log('ProtectedRoute check:', { user, loading, roles });
 
   if (loading) return <div>Loading...</div>;
+
+  const storedToken = localStorage.getItem('token');
+  const storedRole = localStorage.getItem('role');
+  if (!user && storedToken && storedRole) {
+    console.log('Waiting for auth state to restore from localStorage');
+    return <div>Loading...</div>;
+  }
+
   if (!user) {
     console.log('No user → redirecting to /login');
     return <Navigate to="/login" replace />;

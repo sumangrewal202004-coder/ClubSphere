@@ -7,13 +7,14 @@ const api = axios.create({
 // Attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  console.log('Axios request interceptor - token:', token ? 'present' : 'missing');
-
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  config.headers['Content-Type'] = 'application/json';
+  // ✅ Don't set Content-Type for FormData — let the browser set multipart + boundary automatically
+  if (!(config.data instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json';
+  }
 
   return config;
 });

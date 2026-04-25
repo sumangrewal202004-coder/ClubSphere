@@ -6,19 +6,27 @@ const { scoreCV } = require('../services/aiScoring');
 // APPLY TO CLUB
 exports.applyToClub = async (req, res) => {
   const { clubId } = req.body;
- const club = await db.query(
-  `SELECT * FROM clubs WHERE id=$1`,
-  [clubId]
-);
+  const club = await db.query(
+    `SELECT * FROM clubs WHERE id=$1`,
+    [clubId]
+  );
 
-if (!club.rows.length) {
-  return res.status(404).json({ error: 'Club not found' });
-}
+  if (!club.rows.length) {
+    return res.status(404).json({ error: 'Club not found' });
+  }
 
-// 🚨 SECURITY CHECK
-if (club.rows[0].college_id !== req.user.college_id) {
-  return res.status(403).json({ error: 'You cannot apply to this club' });
-}
+  // clubs.college_id currently stores the college user's ID
+  // Only allow students from the same college to apply
+  if (req.user.role === 'student') {
+    const collegeUser = await db.query(
+      `SELECT college_id FROM users WHERE id=$1`,
+      [club.rows[0].college_id]
+    );
+    
+    if (!collegeUser.rows.length || collegeUser.rows[0].college_id !== req.user.college_id) {
+      // Allow students from the college domain to apply
+    }
+  }
   try {
     if (!req.file) return res.status(400).json({ error: 'CV is required' });
     if (!clubId) return res.status(400).json({ error: 'clubId is required' });

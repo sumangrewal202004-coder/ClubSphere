@@ -41,8 +41,14 @@ export default function Navbar() {
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-indigo-600 tracking-tight">
-          Club<span className="text-gray-800">Sphere</span>
+        <Link to="/" className="flex items-center gap-3" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '2.5rem', letterSpacing: '-0.5px' }}>
+          <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <svg viewBox="0 0 20 20" fill="none" className="w-6 h-6">
+              <path d="M10 2L3 6v8l7 4 7-4V6L10 2z" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M10 2v12M3 6l7 4 7-4" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          Club<span style={{ color: '#6366f1' }}>Sphere</span>
         </Link>
 
         {/* Nav Links */}

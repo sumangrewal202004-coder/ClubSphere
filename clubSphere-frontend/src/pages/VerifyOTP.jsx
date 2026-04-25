@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-console.log('VerifyOTP module loaded');
+
 export default function VerifyOTP() {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
@@ -10,16 +10,29 @@ export default function VerifyOTP() {
   const [resending, setResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [redirectRole, setRedirectRole] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginUser } = useAuth();
+  const { loginFromOtp, user } = useAuth();
 
   const email = location.state?.email || localStorage.getItem('otp_email');
 
   useEffect(() => {
     if (!email) navigate('/login');
   }, [email, navigate]);
+
+  useEffect(() => {
+    if (!redirectRole || !user) return;
+
+    switch (redirectRole) {
+      case 'super_admin':   navigate('/admin/dashboard');    break;
+      case 'student':       navigate('/student/clubs');      break;
+      case 'club_manager':  navigate('/manager/dashboard');  break;
+      case 'college':       navigate('/college/dashboard');  break;
+      default:              navigate('/login');
+    }
+  }, [redirectRole, user, navigate]);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -33,33 +46,11 @@ export default function VerifyOTP() {
     setLoading(true);
 
     try {
-      console.log('Verifying OTP for email:', email);
       const res = await api.post('/auth/verify-otp', { email, otp });
-      console.log('OTP verification response:', res.data);
 
-      // Update context AND localStorage together — fixes the race condition
-      loginUser(res.data.token, res.data.role);
+      loginFromOtp(res.data.token, res.data.role);
+      setRedirectRole(res.data.role);
       localStorage.removeItem('otp_email');
-
-      console.log('Navigating to dashboard for role:', res.data.role);
-      switch (res.data.role) {
-        case 'super_admin':
-          console.log('Calling navigate("/admin/dashboard")');
-          navigate('/admin/dashboard');
-          console.log('navigate() called, checking current location');
-          break;
-        case 'student':
-          navigate('/student/clubs');
-          break;
-        case 'club_manager':
-          navigate('/manager/dashboard');
-          break;
-        case 'college':
-          navigate('/college/dashboard');
-          break;
-        default:
-          navigate('/login');
-      }
 
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid OTP. Please try again.');
@@ -179,7 +170,6 @@ export default function VerifyOTP() {
               ← Back to login
             </Link>
           </div>
-
         </div>
       </div>
     </div>

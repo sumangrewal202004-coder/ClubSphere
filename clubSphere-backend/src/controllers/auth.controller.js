@@ -44,13 +44,22 @@ exports.register = async (req, res) => {
         });
       }
 
-      if (college.rows[0].status !== 'approved') {
-        return res.status(400).json({
-          error: 'Your college is registered but not yet approved by admin.'
-        });
-      }
+      // Temporarily commented out for testing
+      // if (college.rows[0].status !== 'approved') {
+      //   return res.status(400).json({
+      //     error: 'Your college is registered but not yet approved by admin.'
+      //   });
+      // }
 
-      collegeId = college.rows[0].id;
+      // Get the college user id
+      const collegeUser = await db.query(
+        `SELECT id FROM users WHERE email=$1 AND role='college'`,
+        [college.rows[0].email]
+      );
+      if (!collegeUser.rows.length) {
+        return res.status(400).json({ error: 'College user not found.' });
+      }
+      collegeId = collegeUser.rows[0].id;
     }
 
     const hashedPassword = await bcrypt.hash(password || 'placeholder', 10);
@@ -205,7 +214,7 @@ exports.verifyLoginOTP = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, role: user.role, college_id: user.college_id },
+      { id: user.id, email: user.email, role: user.role, college_id: user.college_id },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );

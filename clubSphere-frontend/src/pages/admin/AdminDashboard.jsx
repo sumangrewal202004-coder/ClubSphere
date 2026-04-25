@@ -121,6 +121,24 @@ export default function AdminDashboard() {
                   </>
                 )}
 
+                {c.status === 'approved' && (
+                  <button
+                    onClick={() => updateStatus(c.id, 'rejected')}
+                    className="bg-red-100 text-red-600 px-3 py-1 rounded text-sm hover:bg-red-200"
+                  >
+                    Reject
+                  </button>
+                )}
+
+                {c.status === 'rejected' && (
+                  <button
+                    onClick={() => updateStatus(c.id, 'approved')}
+                    className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                  >
+                    Approve
+                  </button>
+                )}
+
               </div>
             </div>
           ))}

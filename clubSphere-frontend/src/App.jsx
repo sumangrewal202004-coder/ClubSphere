@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import './App.css';
 
 // Pages
+import Home from './pages/Home'
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Notifications from './pages/Notifications';
@@ -37,7 +38,7 @@ function Layout() {
 
       <Routes>
         {/* Public */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Home/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
