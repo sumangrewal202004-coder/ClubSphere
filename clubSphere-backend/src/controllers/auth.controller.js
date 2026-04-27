@@ -232,7 +232,6 @@ exports.verifyLoginOTP = async (req, res) => {
   }
 };
 
-
 // ================= GET COLLEGES (public) =================
 exports.getColleges = async (req, res) => {
   try {

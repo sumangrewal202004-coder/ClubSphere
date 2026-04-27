@@ -147,29 +147,73 @@ exports.getClubById = async (req, res) => {
 
 
 exports.deleteClub = async (req, res) => {
-  const { id } = req.params;
+  try {
+    const result = await db.query(
+      `DELETE FROM clubs WHERE id=$1 RETURNING *`,
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    res.json({ message: "Club deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE CLUB MANAGER BY EMAIL
+exports.updateClubManager = async (req, res) => {
+  const { id } = req.params; // club id
+  const { manager_email } = req.body;
 
   try {
-    // Verify this club belongs to the requesting college user
+    if (!manager_email) {
+      return res.status(400).json({ error: 'Manager email is required' });
+    }
+
+    
+    // Check club exists
     const club = await db.query(
-      `SELECT id, name FROM clubs WHERE id=$1 AND college_id=$2`,
-      [id, req.user.id]
+      `SELECT * FROM clubs WHERE id=$1`,
+      [id]
     );
 
     if (club.rows.length === 0) {
-      return res.status(404).json({ error: 'Club not found or you do not have permission to delete it' });
+      return res.status(404).json({ error: 'Club not found' });
     }
 
-    // Delete related data first (applications, events, registrations)
-    await db.query(`DELETE FROM event_registrations WHERE event_id IN (SELECT id FROM events WHERE club_id=$1)`, [id]);
-    await db.query(`DELETE FROM events WHERE club_id=$1`, [id]);
-    await db.query(`DELETE FROM applications WHERE club_id=$1`, [id]);
-    await db.query(`DELETE FROM clubs WHERE id=$1`, [id]);
+    // Check manager exists
+    const manager = await db.query(
+      `SELECT id, role, college_id FROM users WHERE email=$1 AND (role='club_manager' OR role='student')`,
+      [manager_email]
+    );
 
-    res.json({ message: `Club "${club.rows[0].name}" has been deleted successfully` });
+    if (manager.rows.length === 0) {
+      return res.status(400).json({ error: 'No user found with that email' });
+    }
+
+    const managerData = manager.rows[0];
+
+    // SAME COLLEGE VALIDATION
+    if (managerData.college_id !== club.rows[0].college_id) {
+      return res.status(400).json({ error: 'Manager must belong to same college' });
+    }
+
+    // UPDATE MANAGER
+    const updated = await db.query(
+      `UPDATE clubs SET manager_id=$1 WHERE id=$2 RETURNING *`,
+      [managerData.id, id]
+    );
+
+    res.json({
+      message: 'Manager updated successfully',
+      club: updated.rows[0]
+    });
 
   } catch (err) {
-    console.error('Delete club error:', err);
-    res.status(500).json({ error: 'Failed to delete club' });
+    console.error('Update manager error:', err);
+    res.status(500).json({ error: 'Failed to update manager' });
   }
 };

@@ -307,13 +307,36 @@ export default function CollegeDashboard() {
   const [clubs, setClubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
+const changeManager = async (clubId, email) => {
+  try {
+    await api.put(`/clubs/${clubId}/manager`, {
+      manager_email: email
+    });
 
+    alert('Manager updated');
+
+    // refresh
+    const res = await api.get('/clubs/mine');
+    setClubs(res.data);
+
+  } catch (err) {
+    alert(err.response?.data?.error || 'Failed to update manager');
+  }
+};
   useEffect(() => {
     api.get('/clubs/mine')
       .then(res => setClubs(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+
+const openChangeManagerModal = (clubId) => {
+  const email = prompt("Enter new manager email:");
+  if (!email) return;
+
+  changeManager(clubId, email);
+};
 
   const deleteClub = async (clubId, clubName) => {
     const confirmed = window.confirm(
@@ -409,7 +432,12 @@ export default function CollegeDashboard() {
                   <div style={{ fontSize: '0.8rem', color: '#6b6b85' }}>
                     Manager: <span style={{ color: '#e8e8f0' }}>{club.manager_name || 'Not assigned'}</span>
                   </div>
-
+ <button
+                onClick={() => openChangeManagerModal(club.id)}
+                className="w-full bg-white text-black py-2 rounded-xl font-medium hover:bg-gray-200 transition"
+              >
+                Change Manager
+              </button>
                   {/* DELETE BUTTON */}
                   <button
                     onClick={() => deleteClub(club.id, club.name)}
@@ -435,6 +463,7 @@ export default function CollegeDashboard() {
           </div>
         )}
       </div>
+     
     </div>
   );
 }
