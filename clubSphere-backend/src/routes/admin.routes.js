@@ -11,4 +11,8 @@ router.patch(
   admin.updateCollegeStatus
 );
 
+router.get('/colleges/:id/documents', auth(['super_admin']), admin.getCollegeDocuments);
+
+router.delete('/colleges/:id', auth(['super_admin']), admin.deleteCollege);
+
 module.exports = router;

@@ -65,8 +65,10 @@ export default function Home() {
   });
 
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0f', color: '#e8e8f0', minHeight: '100vh', width: '100%', margin: 0, padding: 0 }}>
 
+    <div style={{ fontFamily: "'DM Sans', sans-serif", background: '#0a0a0f', color: '#e8e8f0', minHeight: '100vh', width: '100%', margin: 0, padding: 0 }}>
+<style>{`.cs-brand-name { font-size:27px;font-weight:700;letter-spacing:-.6px;color:#f0eeff; }
+  .cs-brand-name span { color:#7F77DD; }`}</style>
       {/* NAV */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: '0 clamp(1rem, 4vw, 2rem)', height: '76px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'black' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '2.5rem', letterSpacing: '-0.5px' }}>
@@ -76,7 +78,7 @@ export default function Home() {
               <path d="M10 2v12M3 6l7 4 7-4" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/>
             </svg>
           </div>
-          Club<span style={{ color: '#6366f1' }}>Sphere</span>
+          <span className="cs-brand-name">Club<span>Sphere</span></span>
         </div>
         <div style={{ display: 'flex', gap: '1.5rem' }}>
           <button onClick={() => navigate('/login')} style={{ padding: '0.49rem 1.5rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)',  background: 'rgba(255, 255, 255, 0.04)', transition: 'background 0.2s, border-color 0.2s', color: '#e8e8f0', fontSize: '1.3rem', fontFamily: "'DM Sans', sans-serif", cursor: 'pointer', fontWeight: 500 }}>

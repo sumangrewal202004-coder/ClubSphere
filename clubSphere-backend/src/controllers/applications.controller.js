@@ -99,8 +99,6 @@ exports.getMyApplications = async (req, res) => {
         a.id,
         c.name AS club_name,
         c.description AS club_description,
-        a.ai_score,
-        a.ai_feedback,
         a.status,
         a.applied_at
        FROM applications a

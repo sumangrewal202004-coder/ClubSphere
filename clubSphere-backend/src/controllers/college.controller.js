@@ -72,6 +72,7 @@
 // };
 
 const db = require('../config/db');
+const bcrypt = require('bcryptjs');
 
 exports.registerCollege = async (req, res) => {
   const {
@@ -89,8 +90,11 @@ exports.registerCollege = async (req, res) => {
     yearEstablished,
   } = req.body;
 
-  // ── Basic validation ──────────────────────────────────────────────
-  if (!name || !domain || !email || !phone) {
+  const rawDomain = domain ? domain.trim() : '';
+  const cleanDomain = rawDomain.replace(/^@+/, '').toLowerCase();
+
+  // ── Basic validation ────────────────────────────────────
+  if (!name || !cleanDomain || !email || !phone) {
     return res.status(400).json({ error: 'Name, domain, email and phone are required.' });
   }
 
@@ -109,7 +113,7 @@ exports.registerCollege = async (req, res) => {
     // ── Check if college with this domain already exists ──────────────────────────────────────────────
     const existingCollege = await db.query(
       `SELECT id, status, email FROM colleges WHERE domain=$1`,
-      [domain]
+      [cleanDomain]
     );
 
     if (existingCollege.rows.length > 0) {
@@ -136,15 +140,15 @@ exports.registerCollege = async (req, res) => {
        RETURNING *`,
       [
         name,
-        domain,
+        cleanDomain,
         email,
         phone,
-        website        || null,
-        address        || null,
-        collegeType    || null,
-        regNumber      || null,
-        accreditation  || null,
-        university     || null,
+        website        ? website.trim()       : null,
+        address        ? address.trim()       : null,
+        collegeType    ? collegeType.trim()   : null,  // must be government/private/autonomous or null
+        regNumber      ? regNumber.trim()     : null,
+        accreditation  ? accreditation.trim() : null,
+        university     ? university.trim()    : null,
         year           || null,
       ]
     );
@@ -152,14 +156,15 @@ exports.registerCollege = async (req, res) => {
     const collegeId = result.rows[0].id;
 
     // ── Save uploaded documents ────────────────────────────────────
-    // Temporarily commented out for testing
-    // for (const file of req.files) {
-    //   await db.query(
-    //     `INSERT INTO college_documents (college_id, file_path)
-    //      VALUES ($1, $2)`,
-    //     [collegeId, file.path]
-    //   );
-    // }
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        await db.query(
+          `INSERT INTO college_documents (college_id, file_path)
+           VALUES ($1, $2)`,
+          [collegeId, file.path]
+        );
+      }
+    }
 
     // ── Create the college user account ────────────────────────────────────
     const placeholderHash = await bcrypt.hash('placeholder_not_used', 10);

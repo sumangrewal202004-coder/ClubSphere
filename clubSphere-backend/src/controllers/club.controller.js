@@ -17,15 +17,27 @@ exports.createClub = async (req, res) => {
 
     if (manager_email) {
       const manager = await db.query(
-        `SELECT id FROM users WHERE email=$1 AND role='club_manager'`,
+        `SELECT id, role FROM users WHERE email=$1 AND (role='club_manager' OR role='student')`,
         [manager_email]
       );
 
       if (manager.rows.length === 0) {
-        return res.status(400).json({ error: 'No club_manager found with that email' });
+        return res.status(400).json({ error: 'No user found with that email' });
       }
 
-      managerId = manager.rows[0].id;
+      // Check if the manager is from the same college
+      const managerData = manager.rows[0];
+      if (managerData.role === 'student') {
+        const studentCollege = await db.query(
+          `SELECT college_id FROM users WHERE id=$1`,
+          [managerData.id]
+        );
+        if (!studentCollege.rows.length || studentCollege.rows[0].college_id !== collegeId) {
+          return res.status(400).json({ error: 'Manager must be from the same college' });
+        }
+      }
+
+      managerId = managerData.id;
     }
 
     const result = await db.query(

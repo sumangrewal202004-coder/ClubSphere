@@ -233,7 +233,7 @@ const STYLES = `
 
   /* domain prefix */
   .cs-input-prefix { position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#3e3d5c;font-size:15px;pointer-events:none; }
-  .cs-input-prefixed { padding-left:26px !important; }
+  .cs-input-prefixed { padding-left:56px !important; }
 
   /* hint */
   .cs-hint { font-size:12px;color:#4a4870;margin-top:5px;line-height:1.5; }
@@ -354,18 +354,50 @@ export default function Register() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const normalizePhoneDigits = (value) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.startsWith('91') && digits.length > 10) {
+      return digits.slice(digits.length - 10);
+    }
+    return digits.slice(0, 10);
+  };
+
+  const buildIndianPhone = (digits) => digits ? `+91${digits}` : '';
+
+  const validateCollegeRegistration = () => {
+    if (!form.name.trim()) return 'College name is required.';
+    if (!form.email.trim()) return 'Official email is required.';
+    const emailParts = form.email.trim().split('@');
+    if (emailParts.length !== 2 || !emailParts[0] || !emailParts[1]) return 'Enter a valid email address.';
+    if (!form.phone.trim()) return 'Phone number is required.';
+    if (!/^[6-9]\d{9}$/.test(form.phone)) return 'Enter a valid 10-digit Indian phone number.';
+    if (!form.address.trim()) return 'Address is required.';
+    if (!form.domain.trim()) return 'College email domain is required.';
+    if (!form.collegeType) return 'College type is required.';
+    if (!form.yearEstablished) return 'Year of establishment is required.';
+    const year = Number(form.yearEstablished);
+    if (Number.isNaN(year) || year < 1800 || year > new Date().getFullYear()) return 'Enter a valid establishment year.';
+    if (!form.regNumber.trim()) return 'Official registration number is required.';
+    if (documents.length < 1) return 'Please upload at least one verification document.';
+    return '';
+  };
+
   const selectRole = (role) => { set('role', role); setStep(2); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (form.password && form.password.length < 6) return setError('Password must be at least 6 characters.');
-    if (form.role === 'college' && documents.length < 1) return setError('Please upload at least one verification document.');
+    if (form.role === 'college') {
+      const validationMessage = validateCollegeRegistration();
+      if (validationMessage) return setError(validationMessage);
+    }
     setLoading(true);
     try {
       if (form.role === 'college') {
         const fd = new FormData();
-        Object.keys(form).forEach(k => fd.append(k, form[k]));
+        const payload = { ...form, phone: buildIndianPhone(form.phone) };
+        Object.keys(payload).forEach(k => fd.append(k, payload[k]));
         for (let i = 0; i < documents.length; i++) fd.append('documents', documents[i]);
         await api.post('/colleges/register', fd);
       } else {
@@ -535,9 +567,11 @@ export default function Register() {
                   <Field label="Phone Number">
                     <div className="cs-input-wrap">
                       <span className="cs-input-icon"><Icon d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.64A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></span>
-                      <input className="cs-input" type="tel" required placeholder="+91 98765 43210"
-                        value={form.phone} onChange={e => set('phone', e.target.value)} />
+                      <input className="cs-input cs-input-prefixed" type="tel" required placeholder="9876543210"
+                        value={form.phone} onChange={e => set('phone', normalizePhoneDigits(e.target.value))} />
+                      <span className="cs-input-prefix">+91</span>
                     </div>
+                    <p className="cs-hint cs-hint-purple">Enter 10 digits; +91 prefix is added automatically.</p>
                   </Field>
 
                   <Field label="Official Website URL">

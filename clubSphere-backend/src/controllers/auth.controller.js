@@ -51,13 +51,18 @@ exports.register = async (req, res) => {
       //   });
       // }
 
-      // Get the college user id
+      // Get the college user id — join via colleges table to avoid email mismatch
       const collegeUser = await db.query(
-        `SELECT id FROM users WHERE email=$1 AND role='college'`,
-        [college.rows[0].email]
+        `SELECT u.id FROM users u
+         JOIN colleges c ON c.email = u.email
+         WHERE c.domain = $1 AND u.role = 'college'
+         LIMIT 1`,
+        [domain]
       );
       if (!collegeUser.rows.length) {
-        return res.status(400).json({ error: 'College user not found.' });
+        return res.status(400).json({
+          error: 'College account not set up yet. Please contact your college administrator.'
+        });
       }
       collegeId = collegeUser.rows[0].id;
     }
