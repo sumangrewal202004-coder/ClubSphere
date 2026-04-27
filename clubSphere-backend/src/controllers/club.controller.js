@@ -143,3 +143,33 @@ exports.getClubById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch club' });
   }
 };
+
+
+
+exports.deleteClub = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Verify this club belongs to the requesting college user
+    const club = await db.query(
+      `SELECT id, name FROM clubs WHERE id=$1 AND college_id=$2`,
+      [id, req.user.id]
+    );
+
+    if (club.rows.length === 0) {
+      return res.status(404).json({ error: 'Club not found or you do not have permission to delete it' });
+    }
+
+    // Delete related data first (applications, events, registrations)
+    await db.query(`DELETE FROM event_registrations WHERE event_id IN (SELECT id FROM events WHERE club_id=$1)`, [id]);
+    await db.query(`DELETE FROM events WHERE club_id=$1`, [id]);
+    await db.query(`DELETE FROM applications WHERE club_id=$1`, [id]);
+    await db.query(`DELETE FROM clubs WHERE id=$1`, [id]);
+
+    res.json({ message: `Club "${club.rows[0].name}" has been deleted successfully` });
+
+  } catch (err) {
+    console.error('Delete club error:', err);
+    res.status(500).json({ error: 'Failed to delete club' });
+  }
+};
