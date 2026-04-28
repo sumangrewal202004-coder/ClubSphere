@@ -5,23 +5,30 @@ import api from '../api/axios';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { token, role }
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Restore session from localStorage on page load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const role  = localStorage.getItem('role');
-    if (token && role) setUser({ token, role });
+    const availableRoles = JSON.parse(localStorage.getItem('availableRoles') || '[]');
+    const sessionRole = localStorage.getItem('sessionRole');
+    if (token && role) setUser({ token, role, availableRoles, sessionRole: sessionRole || role });
     setLoading(false);
   }, []);
 
-  // ── Called by VerifyOTP after a successful OTP login ──
-  const loginFromOtp = (token, role) => {
+  const loginFromOtp = (token, role, availableRoles = [role]) => {
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
-    setUser({ token, role }); // ← this is what ProtectedRoute reads
+    localStorage.setItem('availableRoles', JSON.stringify(availableRoles));
+    localStorage.setItem('sessionRole', role);
+    setUser({ token, role, availableRoles, sessionRole: role });
+  };
+
+  const switchSessionRole = (sessionRole) => {
+    localStorage.setItem('sessionRole', sessionRole);
+    setUser(u => ({ ...u, sessionRole }));
   };
 
   const login = async (email, password) => {
@@ -29,7 +36,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', res.data.token);
     localStorage.setItem('role', res.data.role);
     setUser({ token: res.data.token, role: res.data.role });
-    if (res.data.role === 'college')      navigate('/college/dashboard');
+    if (res.data.role === 'college')           navigate('/college/dashboard');
     else if (res.data.role === 'club_manager') navigate('/manager/dashboard');
     else if (res.data.role === 'super_admin')  navigate('/admin/dashboard');
     else navigate('/student/clubs');
@@ -43,12 +50,14 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('availableRoles');
+    localStorage.removeItem('sessionRole');
     setUser(null);
     navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loginFromOtp, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loginFromOtp, switchSessionRole, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );

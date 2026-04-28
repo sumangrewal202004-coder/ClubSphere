@@ -37,7 +37,7 @@ export default function Notifications() {
         }))
       }));
 
-    } catch (err) {
+    } catch {
       alert('Failed to mark all as read');
     } finally {
       setUpdating(false);
@@ -60,7 +60,7 @@ export default function Notifications() {
         )
       }));
 
-    } catch (err) {
+    } catch {
       alert('Failed to update notification');
     } finally {
       setUpdating(false);
@@ -68,90 +68,179 @@ export default function Notifications() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div style={page}>
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+      <div style={container}>
+
+        {/* HEADER */}
+        <div style={header}>
+          <div>
+            <h1 style={title}>Notifications</h1>
+
+            {data.unread_count > 0 && (
+              <p style={unread}>
+                {data.unread_count} unread
+              </p>
+            )}
+          </div>
 
           {data.unread_count > 0 && (
-            <p className="text-sm text-indigo-600 mt-0.5">
-              {data.unread_count} unread
-            </p>
+            <button
+              onClick={markAllRead}
+              disabled={updating}
+              style={markAllBtn}
+            >
+              Mark all read
+            </button>
           )}
         </div>
 
-        {data.unread_count > 0 && (
-          <button
-            onClick={markAllRead}
-            disabled={updating}
-            className="text-sm text-gray-500 hover:text-indigo-600 transition font-medium disabled:opacity-50"
-          >
-            Mark all read
-          </button>
+        {/* ERROR */}
+        {error && <div style={errorBox}>{error}</div>}
+
+        {/* LOADING */}
+        {loading ? (
+          <div style={empty}>Loading...</div>
+        ) : data.notifications.length === 0 ? (
+          <div style={emptyCard}>No notifications yet</div>
+        ) : (
+          <div style={list}>
+
+            {data.notifications.map(n => (
+              <div
+                key={n.id}
+                onClick={() => !n.is_read && markRead(n.id)}
+                style={{
+                  ...card,
+                  background: n.is_read
+                    ? 'rgba(255,255,255,0.03)'
+                    : 'rgba(99,102,241,0.12)',
+                  border: n.is_read
+                    ? '1px solid rgba(255,255,255,0.06)'
+                    : '1px solid rgba(99,102,241,0.3)'
+                }}
+              >
+
+                <div style={row}>
+
+                  {/* DOT */}
+                  <div style={{
+                    ...dot,
+                    background: n.is_read ? '#555' : '#6366f1'
+                  }} />
+
+                  {/* CONTENT */}
+                  <div style={{ flex: 1 }}>
+                    <p style={{
+                      fontSize: '0.95rem',
+                      fontWeight: n.is_read ? 400 : 600,
+                      color: n.is_read ? '#9ca3af' : '#fff'
+                    }}>
+                      {n.message}
+                    </p>
+
+                    <p style={time}>
+                      {new Date(n.created_at).toLocaleString()}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            ))}
+
+          </div>
         )}
       </div>
-
-      {/* Error */}
-      {error && (
-        <div className="mb-4 text-red-500">{error}</div>
-      )}
-
-      {/* Loading */}
-      {loading ? (
-        <div className="text-center py-16 text-gray-400">
-          Loading...
-        </div>
-      ) : data.notifications.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
-          <p className="text-gray-400">No notifications yet.</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-
-          {data.notifications.map(n => (
-            <div
-              key={n.id}
-              onClick={() => !n.is_read && markRead(n.id)}
-              className={`p-4 rounded-xl border cursor-pointer transition ${
-                n.is_read
-                  ? 'bg-white border-gray-100 hover:bg-gray-50'
-                  : 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-
-                {/* Dot */}
-                <div
-                  className={`w-2 h-2 rounded-full mt-2 ${
-                    n.is_read ? 'bg-gray-200' : 'bg-indigo-500'
-                  }`}
-                />
-
-                {/* Content */}
-                <div className="flex-1">
-                  <p
-                    className={`text-sm ${
-                      n.is_read
-                        ? 'text-gray-600'
-                        : 'text-gray-900 font-medium'
-                    }`}
-                  >
-                    {n.message}
-                  </p>
-
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(n.created_at).toLocaleString()}
-                  </p>
-                </div>
-
-              </div>
-            </div>
-          ))}
-
-        </div>
-      )}
     </div>
   );
 }
+
+/* STYLES */
+
+const page = {
+  background: '#0a0a0f',
+  minHeight: '100vh',
+  color: '#e8e8f0',
+  padding: '2rem'
+};
+
+const container = {
+  maxWidth: '700px',
+  margin: '0 auto'
+};
+
+const header = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '1.5rem'
+};
+
+const title = {
+  fontSize: '2rem',
+  fontWeight: 700
+};
+
+const unread = {
+  fontSize: '0.85rem',
+  color: '#6366f1'
+};
+
+const markAllBtn = {
+  fontSize: '0.85rem',
+  color: '#6366f1',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer'
+};
+
+const list = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px'
+};
+
+const card = {
+  padding: '14px',
+  borderRadius: '12px',
+  cursor: 'pointer',
+  transition: '0.2s'
+};
+
+const row = {
+  display: 'flex',
+  gap: '10px',
+  alignItems: 'flex-start'
+};
+
+const dot = {
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  marginTop: '6px'
+};
+
+const time = {
+  fontSize: '0.75rem',
+  color: '#6b7280',
+  marginTop: '4px'
+};
+
+const empty = {
+  textAlign: 'center',
+  padding: '3rem',
+  color: '#7a7a96'
+};
+
+const emptyCard = {
+  textAlign: 'center',
+  padding: '3rem',
+  borderRadius: '16px',
+  background: 'rgba(255,255,255,0.03)',
+  border: '1px dashed rgba(255,255,255,0.08)'
+};
+
+const errorBox = {
+  color: '#f87171',
+  marginBottom: '10px'
+};

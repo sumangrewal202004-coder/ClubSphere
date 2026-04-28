@@ -26,10 +26,11 @@ export default function CreateEvent() {
       })
       .catch(console.error);
   }, []);
-if (!form.clubId) {
-  return setError('Please select a club');
-}
+
   const handleSubmit = async (e) => {
+    if (!form.clubId) {
+      return setError('Please select a club');
+    }
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -44,95 +45,200 @@ if (!form.clubId) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Create Event</h1>
-        <p className="text-gray-500 text-sm mt-1">Club members will be notified automatically</p>
+    <div style={{
+      background: '#0a0a0f',
+      minHeight: '100vh',
+      color: '#e8e8f0',
+      padding: '2rem'
+    }}>
+
+      {/* GLOW BACKGROUND */}
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '500px',
+          height: '500px',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.2), transparent 70%)'
+        }} />
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-8">
-        {error && (
-          <div className="mb-5 p-3 bg-red-50 border border-red-100 text-red-600 text-sm rounded-lg">{error}</div>
-        )}
+      <div style={{ maxWidth: '700px', margin: '0 auto', position: 'relative' }}>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Club *</label>
-            <select
-              required
-              value={form.clubId}
-              onChange={e => setForm({ ...form, clubId: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-            >
-              <option value="">Select a club</option>
-              {clubs.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
+        {/* HEADER */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>
+            Create Event
+          </h1>
+          <p style={{ color: '#7a7a96', marginTop: '4px' }}>
+            Club members will be notified automatically
+          </p>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
-            <input
-              required
-              value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. Annual Hackathon 2025"
-            />
-          </div>
+        {/* CARD */}
+        <div style={{
+          padding: '2rem',
+          borderRadius: '20px',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 0 40px rgba(99,102,241,0.1)'
+        }}>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              rows={3}
-              value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              placeholder="What will happen at this event?"
-            />
-          </div>
+          {/* ERROR */}
+          {error && (
+            <div style={{
+              marginBottom: '1rem',
+              padding: '10px',
+              borderRadius: '10px',
+              background: 'rgba(255,0,0,0.08)',
+              border: '1px solid rgba(255,0,0,0.2)',
+              color: '#ff6b6b',
+              fontSize: '0.9rem'
+            }}>
+              {error}
+            </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Venue *</label>
-            <input
-              required
-              value={form.venue}
-              onChange={e => setForm({ ...form, venue: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. Main Auditorium, Room 204"
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date & Time *</label>
-            <input
-              type="datetime-local"
-              required
-              value={form.event_date}
-              onChange={e => setForm({ ...form, event_date: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+            {/* CLUB */}
+            <div style={field}>
+              <label style={label}>Club *</label>
+              <select
+                required
+                value={form.clubId}
+                onChange={e => setForm({ ...form, clubId: e.target.value })}
+                style={input}
+              >
+                <option value="">Select a club</option>
+                {clubs.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-60"
-            >
-              {loading ? 'Creating...' : 'Create Event'}
-            </button>
-          </div>
-        </form>
+            {/* TITLE */}
+            <div style={field}>
+              <label style={label}>Event Title *</label>
+              <input
+                required
+                value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                placeholder="e.g. Annual Hackathon 2025"
+                style={input}
+              />
+            </div>
+
+            {/* DESCRIPTION */}
+            <div style={field}>
+              <label style={label}>Description</label>
+              <textarea
+                rows={3}
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                placeholder="What will happen at this event?"
+                style={textarea}
+              />
+            </div>
+
+            {/* VENUE */}
+            <div style={field}>
+              <label style={label}>Venue *</label>
+              <input
+                required
+                value={form.venue}
+                onChange={e => setForm({ ...form, venue: e.target.value })}
+                placeholder="e.g. Auditorium"
+                style={input}
+              />
+            </div>
+
+            {/* DATE */}
+            <div style={field}>
+              <label style={label}>Date & Time *</label>
+              <input
+                type="datetime-local"
+                required
+                value={form.event_date}
+                onChange={e => setForm({ ...form, event_date: e.target.value })}
+                style={input}
+              />
+            </div>
+
+            {/* BUTTONS */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#cfcfe8',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '12px',
+                  background: '#6366f1',
+                  border: 'none',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 0 30px rgba(99,102,241,0.4)',
+                  opacity: loading ? 0.6 : 1
+                }}
+              >
+                {loading ? 'Creating...' : 'Create Event'}
+              </button>
+
+            </div>
+
+          </form>
+        </div>
       </div>
     </div>
   );
 }
+
+/* STYLES */
+
+const field = {
+  marginBottom: '1.2rem'
+};
+
+const label = {
+  display: 'block',
+  marginBottom: '6px',
+  fontSize: '0.9rem',
+  color: '#a5a5c2'
+};
+
+const input = {
+  width: '100%',
+  padding: '12px',
+  borderRadius: '10px',
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(255,255,255,0.05)',
+  color: '#fff',
+  outline: 'none'
+};
+
+const textarea = {
+  ...input,
+  resize: 'none'
+};

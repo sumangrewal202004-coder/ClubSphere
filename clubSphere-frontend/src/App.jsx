@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/Protectedroute';
@@ -10,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Notifications from './pages/Notifications';
 import VerifyOTP from './pages/VerifyOTP';
+import ChooseRole from './pages/ChooseRole';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 // College
@@ -30,7 +32,7 @@ import StudentEvents from './pages/student/Studentevents';
 function Layout() {
   const location = useLocation();
 
-  const hideNavbarRoutes = ['/login', '/register', '/verify-otp'];
+  const hideNavbarRoutes = ['/login', '/register', '/verify-otp', '/choose-role'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -42,6 +44,7 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/choose-role" element={<ChooseRole />} />
 
         {/* Shared */}
         <Route

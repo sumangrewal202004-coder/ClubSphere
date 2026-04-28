@@ -5,6 +5,7 @@ import api from '../api/axios';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
@@ -35,7 +36,8 @@ export default function Navbar() {
     ],
   };
 
-  const roleLinks = user ? links[user.role] || [] : [];
+  const effectiveRole = user?.sessionRole || user?.role;
+  const roleLinks = user ? links[effectiveRole] || [] : [];
 
   return (
     <>
@@ -194,8 +196,19 @@ export default function Navbar() {
 
                 {/* Role badge */}
                 <span className="navbar-role">
-                  {user.role.replace('_', ' ')}
+                  {(user.sessionRole || user.role).replace('_', ' ')}
                 </span>
+
+                {/* Switch view for dual-role users */}
+                {user?.availableRoles?.length > 1 && (
+                  <button
+                    onClick={() => navigate('/choose-role')}
+                    className="navbar-btn"
+                    style={{ background:'rgba(127,119,221,0.15)', color:'#7F77DD', border:'1px solid rgba(127,119,221,0.3)', fontSize:'0.8rem' }}
+                  >
+                    Switch View
+                  </button>
+                )}
 
                 <button
                   onClick={logout}

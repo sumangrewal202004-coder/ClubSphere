@@ -218,13 +218,16 @@ exports.verifyLoginOTP = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role, college_id: user.college_id },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const availableRoles = user.role === 'club_manager'
+  ? ['club_manager', 'student']
+  : [user.role];
 
-    res.json({ token, role: user.role, name: user.name });
+const token = jwt.sign(
+  { id: user.id, email: user.email, role: user.role, college_id: user.college_id, availableRoles },
+  process.env.JWT_SECRET,
+  { expiresIn: '7d' }
+);
+res.json({ token, role: user.role, name: user.name, availableRoles });
 
   } catch (err) {
     console.error('Verify OTP error:', err);
@@ -244,3 +247,7 @@ exports.getColleges = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch colleges' });
   }
 };
+
+
+
+

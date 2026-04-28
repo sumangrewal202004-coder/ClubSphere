@@ -22,84 +22,111 @@ export default function BrowseClubs() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div style={page}>
 
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Browse Clubs</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Find a club and apply with your CV
-        </p>
-      </div>
+      <div style={container}>
 
-      {error && (
-        <div className="text-red-500 mb-4">{error}</div>
-      )}
+        <div style={header}>
+          <h1 style={title}>Browse Clubs</h1>
+          <p style={subtitle}>Find a club and apply with your CV</p>
+        </div>
 
-      {/* Search */}
-      <div className="mb-6">
+        {error && <div style={errorBox}>{error}</div>}
+
+        {/* SEARCH */}
         <input
-          type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-md px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Search clubs..."
+          style={input}
         />
-      </div>
 
-      {loading ? (
-        <div className="text-center py-16 text-gray-400">Loading clubs...</div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">No clubs found.</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map(club => (
-            <div key={club.id} className="bg-white rounded-xl border border-gray-100 p-6 flex flex-col hover:shadow-sm transition">
+        {loading ? (
+          <div style={empty}>Loading clubs...</div>
+        ) : filtered.length === 0 ? (
+          <div style={empty}>No clubs found</div>
+        ) : (
+          <div style={grid}>
+            {filtered.map(club => (
+              <div key={club.id} style={card}>
 
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 text-lg mb-1">
-                  {club.name}
-                </h3>
+                <h3 style={cardTitle}>{club.name}</h3>
+                <p style={college}>{club.college_name}</p>
 
-                <p className="text-xs text-indigo-500 mb-3">
-                  {club.college_name}
-                </p>
-
-                <p className="text-sm text-gray-500 mb-4 line-clamp-3">
-                  {club.description}
-                </p>
+                <p style={desc}>{club.description}</p>
 
                 {club.requirements && (
-                  <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                    <p className="text-xs font-medium text-gray-600 mb-1">
-                      What they look for:
-                    </p>
-                    <p className="text-xs text-gray-500 line-clamp-3">
-                      {club.requirements}
-                    </p>
+                  <div style={reqBox}>
+                    <p style={reqTitle}>What they look for</p>
+                    <p style={reqText}>{club.requirements}</p>
                   </div>
                 )}
+
+                <button
+                  onClick={() => setSelectedClub(club)}
+                  style={primaryBtn}
+                >
+                  Apply Now
+                </button>
+
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <button
-                onClick={() => setSelectedClub(club)}
-                className="mt-4 w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition"
-              >
-                Apply Now
-              </button>
-
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Apply Modal */}
       {selectedClub && (
-        <ApplyModal
-          club={selectedClub}
-          onClose={() => setSelectedClub(null)}
-        />
+        <ApplyModal club={selectedClub} onClose={() => setSelectedClub(null)} />
       )}
-
     </div>
   );
 }
+
+/* styles */
+const page = { background: '#0a0a0f', minHeight: '100vh', color: '#e8e8f0', padding: '2rem' };
+const container = { maxWidth: '1100px', margin: '0 auto' };
+const header = { marginBottom: '1.5rem' };
+const title = { fontSize: '2rem', fontWeight: 700 };
+const subtitle = { color: '#7a7a96' };
+
+const input = {
+  padding: '12px',
+  width: '100%',
+  maxWidth: '400px',
+  marginBottom: '1.5rem',
+  borderRadius: '10px',
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  color: '#fff'
+};
+
+const grid = { display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))' };
+
+const card = {
+  padding: '1.5rem',
+  borderRadius: '16px',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)'
+};
+
+const cardTitle = { fontWeight: 600, fontSize: '1.1rem' };
+const college = { fontSize: '0.8rem', color: '#6366f1', marginBottom: '8px' };
+const desc = { color: '#7a7a96', fontSize: '0.9rem', marginBottom: '10px' };
+
+const reqBox = { background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '10px', marginBottom: '10px' };
+const reqTitle = { fontSize: '0.75rem', color: '#a5a5c2' };
+const reqText = { fontSize: '0.8rem', color: '#7a7a96' };
+
+const primaryBtn = {
+  marginTop: '10px',
+  width: '100%',
+  padding: '10px',
+  borderRadius: '10px',
+  background: '#6366f1',
+  color: '#fff',
+  border: 'none',
+  cursor: 'pointer'
+};
+
+const empty = { textAlign: 'center', padding: '3rem', color: '#7a7a96' };
+const errorBox = { color: '#f87171', marginBottom: '10px' };
