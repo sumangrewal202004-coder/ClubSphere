@@ -149,10 +149,10 @@ exports.sendOtp = async (req, res) => {
       : email;
 
     try {
-      await transporter.sendMail({
-        from: `"ClubSphere" <${process.env.EMAIL_USER}>`,
-        to: recipient,
-        subject: 'Your ClubSphere Login OTP',
+      await resend.emails.send({
+  from: 'ClubSphere <onboarding@resend.dev>',
+  to: recipient,
+  subject: 'Your ClubSphere Login OTP',
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
             <h2 style="color: #4F46E5; margin-bottom: 8px;">ClubSphere</h2>
