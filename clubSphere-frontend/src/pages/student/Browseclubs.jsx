@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import Applymodal from '../../components/Applymodal';
+import ApplyModal from '../../components/Applymodal';
 
 export default function BrowseClubs() {
   const [clubs, setClubs] = useState([]);
@@ -76,7 +76,7 @@ export default function BrowseClubs() {
       </div>
 
       {selectedClub && (
-        <Applymodal club={selectedClub} onClose={() => setSelectedClub(null)} />
+        <ApplyModal club={selectedClub} onClose={() => setSelectedClub(null)} />
       )}
     </div>
   );

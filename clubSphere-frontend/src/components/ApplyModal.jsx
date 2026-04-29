@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../api/axios';
 
-export default function Applymodal({ club, onClose }) {
+export default function ApplyModal({ club, onClose }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
