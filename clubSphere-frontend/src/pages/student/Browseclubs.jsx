@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-import ApplyModal from '../../components/Applymodal';
+import ApplyModal from '../../components/ApplyModal';
 
 export default function BrowseClubs() {
   const [clubs, setClubs] = useState([]);
