@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const transporter = require('../config/mailer');
+const resend = require('../config/mailer');
 
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
