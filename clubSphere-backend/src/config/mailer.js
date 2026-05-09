@@ -45,6 +45,28 @@
 // });
 
 // module.exports = transporter;
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
-module.exports = resend;
+// const { Resend } = require('resend');
+// const resend = new Resend(process.env.RESEND_API_KEY);
+// module.exports = resend;
+
+const SibApiV3Sdk = require('@getbrevo/brevo');
+
+const client = SibApiV3Sdk.ApiClient.instance;
+client.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
+
+const transporter = {
+  sendMail: async ({ from, to, subject, html }) => {
+    const api = new SibApiV3Sdk.TransactionalEmailsApi();
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+    sendSmtpEmail.sender = { email: process.env.EMAIL_FROM, name: 'ClubSphere' };
+    sendSmtpEmail.to = [{ email: Array.isArray(to) ? to[0] : to }];
+    sendSmtpEmail.subject = subject;
+    sendSmtpEmail.htmlContent = html;
+
+    const result = await api.sendTransacEmail(sendSmtpEmail);
+    return result;
+  }
+};
+
+module.exports = transporter;
