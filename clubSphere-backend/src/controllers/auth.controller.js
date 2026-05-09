@@ -252,7 +252,6 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const transporter = require('../config/mailer');
-
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 // ================= REGISTER =================
@@ -393,9 +392,9 @@ exports.sendOtp = async (req, res) => {
     // Resend dashboard OR verify a custom sending domain (recommended for prod).
     // ──────────────────────────────────────────────────────────────────────────
     try {
-      const emailResponse = await resend.emails.send({
-        from: 'ClubSphere <onboarding@resend.dev>',
-        to: email,                          // ← always the real user's email
+ await transporter.sendMail({
+        from: `ClubSphere <${process.env.EMAIL_FROM}>`,
+        to: email,
         subject: 'Your ClubSphere Login OTP',
         html: `
           <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
@@ -410,22 +409,10 @@ exports.sendOtp = async (req, res) => {
           </div>
         `
       });
-
-      // Resend returns an error object instead of throwing in some cases
-      if (emailResponse.error) {
-        console.error('Resend API error:', emailResponse.error);
-        // Still return success to client — OTP is in DB and logged to console
-        // so admin can relay it manually during dev/testing
-        return res.json({
-          message: 'OTP sent to your email',
-          _devNote: `Mail delivery failed: ${emailResponse.error.message}. OTP logged to server console.`
-        });
-      }
-
-      console.log('✅ Email sent successfully to:', email, '| ID:', emailResponse.data?.id);
+      console.log('✅ Email sent to:', email);
     } catch (mailErr) {
       console.error('❌ Mail send exception:', mailErr.message);
-      // Don't block login flow — OTP is still valid in DB
+      // OTP still valid in DB — login still works via console OTP
     }
 
     res.json({ message: 'OTP sent to your email' });
@@ -435,7 +422,6 @@ exports.sendOtp = async (req, res) => {
     res.status(500).json({ error: 'Failed to send OTP' });
   }
 };
-
 
 // ================= VERIFY OTP =================
 exports.verifyLoginOTP = async (req, res) => {
