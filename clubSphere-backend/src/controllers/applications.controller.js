@@ -1,5 +1,4 @@
 const db = require('../config/db');
-const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const { scoreCV } = require('../services/aiScoring');
  
@@ -56,34 +55,35 @@ exports.applyToClub = async (req, res) => {
     });
  
     // Background AI processing
-    try {
-      const club = await db.query(
-        `SELECT requirements FROM clubs WHERE id=$1`, [clubId]
-      );
-      const requirements = club.rows[0]?.requirements || '';
- 
-      const fileBuffer = fs.readFileSync(req.file.path);
-      const pdfData = await pdfParse(fileBuffer);
-      const cvText = pdfData.text;
- 
-      const aiResult = await scoreCV(cvText, requirements);
- 
-      await db.query(
-        `UPDATE applications SET ai_score=$1, ai_feedback=$2 WHERE id=$3`,
-        [aiResult.score, aiResult.feedback, appData.id]
-      );
- 
-      // Notify student that application was received (no score revealed)
-      await db.query(
-        `INSERT INTO notifications (user_id, message)
-         VALUES ($1, $2)`,
-        [req.user.id, `Your application has been received and is under review. You will be notified if you are selected.`]
-      );
- 
-    } catch (aiErr) {
-      console.error('AI Processing Error:', aiErr.message);
-      console.error('Stack:', aiErr.stack);
-    }
+    // Background AI processing
+try {
+  const club = await db.query(
+    `SELECT requirements FROM clubs WHERE id=$1`, [clubId]
+  );
+  const requirements = club.rows[0]?.requirements || '';
+
+  // ✅ fetch PDF from Cloudinary URL instead of reading from disk
+  const axios = require('axios');
+  const response = await axios.get(req.file.path, { responseType: 'arraybuffer' });
+  const fileBuffer = Buffer.from(response.data);
+  const pdfData = await pdfParse(fileBuffer);
+  const cvText = pdfData.text;
+
+  const aiResult = await scoreCV(cvText, requirements);
+
+  await db.query(
+    `UPDATE applications SET ai_score=$1, ai_feedback=$2 WHERE id=$3`,
+    [aiResult.score, aiResult.feedback, appData.id]
+  );
+
+  await db.query(
+    `INSERT INTO notifications (user_id, message) VALUES ($1, $2)`,
+    [req.user.id, `Your application has been received and is under review. You will be notified if you are selected.`]
+  );
+
+} catch (aiErr) {
+  console.error('AI Processing Error:', aiErr.message);
+}
  
   } catch (err) {
     console.error('Application Error:', err);

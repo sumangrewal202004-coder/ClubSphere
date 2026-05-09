@@ -11,14 +11,16 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'clubsphere-college-docs',
-    allowed_formats: ['pdf', 'jpg', 'jpeg', 'png'],
-    resource_type: 'raw',
-    public_id: (req, file) => `doc-${Date.now()}-${file.originalname}`
+    folder: 'clubsphere-cvs',        // folder name in your Cloudinary account
+    allowed_formats: ['pdf'],
+    resource_type: 'raw',            // required for PDFs
+    public_id: (req, file) => `cv-${req.user.id}-${Date.now()}`
   }
 });
 
-module.exports = multer({
+const upload = multer({ 
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB max
 });
+
+module.exports = { upload, cloudinary };
