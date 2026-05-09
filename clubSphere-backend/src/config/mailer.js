@@ -49,22 +49,28 @@
 // const resend = new Resend(process.env.RESEND_API_KEY);
 // module.exports = resend;
 
-const SibApiV3Sdk = require('@getbrevo/brevo');
+// config/mailer.js
+// Uses Brevo (HTTPS-based) — works on Render free tier unlike SMTP.
+// Wrapped to match nodemailer's sendMail() so no other file needs to change.
 
-const client = SibApiV3Sdk.ApiClient.instance;
-client.authentications['api-key'].apiKey = process.env.BREVO_API_KEY;
+const { BrevoClient, BrevoEnvironment } = require('@getbrevo/brevo');
+
+const client = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+  environment: BrevoEnvironment.Production,
+});
 
 const transporter = {
   sendMail: async ({ from, to, subject, html }) => {
-    const api = new SibApiV3Sdk.TransactionalEmailsApi();
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
-    sendSmtpEmail.sender = { email: process.env.EMAIL_FROM, name: 'ClubSphere' };
-    sendSmtpEmail.to = [{ email: Array.isArray(to) ? to[0] : to }];
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = html;
-
-    const result = await api.sendTransacEmail(sendSmtpEmail);
+    const result = await client.transactionalEmails.sendTransacEmail({
+      sender: {
+        email: process.env.EMAIL_FROM,
+        name: 'ClubSphere',
+      },
+      to: [{ email: Array.isArray(to) ? to[0] : to }],
+      subject,
+      htmlContent: html,
+    });
     return result;
   }
 };
