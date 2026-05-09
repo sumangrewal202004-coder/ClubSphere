@@ -28,21 +28,22 @@ export default function CreateEvent() {
   }, []);
 
   const handleSubmit = async (e) => {
-    if (!form.clubId) {
-      return setError('Please select a club');
-    }
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      await api.post('/events', form);
-      navigate('/manager/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create event');
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault(); // ✅ moved to top
+  if (!form.clubId) return setError('Please select a club');
+
+  setError('');
+  setLoading(true); // ✅ removed stray `bb`
+  try {
+    await api.post('/events', form);
+    // ✅ success feedback before navigating
+    alert('Event created! Members will be notified.');
+    navigate('/manager/dashboard');
+  } catch (err) {
+    setError(err.response?.data?.error || 'Failed to create event');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div style={{

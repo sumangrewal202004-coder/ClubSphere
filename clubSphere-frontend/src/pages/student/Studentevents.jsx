@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 
@@ -26,6 +25,9 @@ export default function StudentEvents() {
     try {
       await api.post('/events/register', { eventId });
       setMyEvents(prev => [...prev, eventId]);
+      alert('Registered successfully! Check your notifications.');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to register');
     } finally {
       setRegistering(null);
     }
@@ -43,11 +45,13 @@ export default function StudentEvents() {
         <h1 style={title}>Events</h1>
         <p style={subtitle}>Explore and register</p>
 
-        {/* tabs */}
+        {error && <div style={errorBox}>{error}</div>}
+
+        {/* TABS */}
         <div style={tabs}>
           {['all', 'mine'].map(t => (
             <button key={t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>
-              {t}
+              {t === 'all' ? 'All Events' : 'My Events'}
             </button>
           ))}
         </div>
@@ -55,7 +59,7 @@ export default function StudentEvents() {
         {loading ? (
           <div style={empty}>Loading...</div>
         ) : displayEvents.length === 0 ? (
-          <div style={empty}>No events</div>
+          <div style={empty}>No events found</div>
         ) : (
           <div style={grid}>
             {displayEvents.map(e => {
@@ -64,17 +68,31 @@ export default function StudentEvents() {
 
               return (
                 <div key={e.id} style={card}>
-                  <h3>{e.title}</h3>
-                  <p style={{ color: '#6366f1' }}>{e.club_name}</p>
-                  <p style={{ color: '#7a7a96' }}>{e.description}</p>
+                  <h3 style={{ marginBottom: '4px' }}>{e.title}</h3>
+                  <p style={{ color: '#6366f1', marginBottom: '6px' }}>{e.club_name}</p>
+                  <p style={{ color: '#7a7a96', marginBottom: '8px' }}>{e.description}</p>
 
-                  <div style={{ fontSize: '0.8rem', color: '#7a7a96' }}>
-                    📅 {date.toLocaleDateString()}
+                  {/* ✅ single date+time line, no duplicate */}
+                  <div style={{ fontSize: '0.8rem', color: '#7a7a96', marginBottom: '4px' }}>
+                    📅 {date.toLocaleDateString()} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
 
-                  {!registered && (
-                    <button onClick={() => register(e.id)} style={primaryBtn}>
-                      Register
+                  {/* ✅ venue */}
+                  {e.venue && (
+                    <div style={{ fontSize: '0.8rem', color: '#7a7a96', marginBottom: '8px' }}>
+                      📍 {e.venue}
+                    </div>
+                  )}
+
+                  {registered ? (
+                    <div style={registeredBadge}>✓ Registered</div>
+                  ) : (
+                    <button
+                      onClick={() => register(e.id)}
+                      disabled={registering === e.id}
+                      style={{ ...primaryBtn, opacity: registering === e.id ? 0.6 : 1 }}
+                    >
+                      {registering === e.id ? 'Registering...' : 'Register'}
                     </button>
                   )}
                 </div>
@@ -92,10 +110,11 @@ const page = { background: '#0a0a0f', minHeight: '100vh', color: '#e8e8f0', padd
 const container = { maxWidth: '900px', margin: '0 auto' };
 const title = { fontSize: '2rem', fontWeight: 700 };
 const subtitle = { color: '#7a7a96' };
+const errorBox = { color: '#f87171', marginBottom: '10px' };
 
 const grid = { display: 'grid', gap: '1rem' };
 const card = {
-  padding: '1rem',
+  padding: '1.2rem',
   borderRadius: '14px',
   background: 'rgba(255,255,255,0.04)',
   border: '1px solid rgba(255,255,255,0.08)'
@@ -103,11 +122,23 @@ const card = {
 
 const primaryBtn = {
   marginTop: '10px',
-  padding: '8px',
+  padding: '8px 16px',
   borderRadius: '8px',
   background: '#6366f1',
   color: '#fff',
-  border: 'none'
+  border: 'none',
+  cursor: 'pointer'
+};
+
+const registeredBadge = {
+  marginTop: '10px',
+  display: 'inline-block',
+  padding: '6px 12px',
+  borderRadius: '8px',
+  background: 'rgba(99,102,241,0.15)',
+  border: '1px solid rgba(99,102,241,0.3)',
+  color: '#818cf8',
+  fontSize: '0.85rem'
 };
 
 const tabs = { display: 'flex', gap: '10px', margin: '1rem 0' };
@@ -116,7 +147,8 @@ const tabBtn = (active) => ({
   borderRadius: '8px',
   background: active ? '#6366f1' : 'rgba(255,255,255,0.05)',
   color: active ? '#fff' : '#aaa',
-  border: 'none'
+  border: 'none',
+  cursor: 'pointer'
 });
 
 const empty = { textAlign: 'center', padding: '3rem', color: '#7a7a96' };

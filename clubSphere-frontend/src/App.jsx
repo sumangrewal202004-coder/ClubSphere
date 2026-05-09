@@ -14,6 +14,7 @@ import VerifyOTP from './pages/VerifyOTP';
 import ChooseRole from './pages/ChooseRole';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
+
 // College
 import CollegeDashboard from './pages/college/CollegeDashboard';
 import CreateClub from './pages/college/CreateClub';
@@ -22,6 +23,7 @@ import CreateClub from './pages/college/CreateClub';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import ApplicationsReview from './pages/manager/ApplicationsReview';
 import CreateEvent from './pages/manager/CreateEvent';
+import ClubRegistrations from './pages/manager/ClubRegistrations';
 
 // Student
 import BrowseClubs from './pages/student/BrowseClubs';
@@ -45,7 +47,7 @@ function Layout() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/choose-role" element={<ChooseRole />} />
-
+<Route path="/manager/clubs/:clubId/registrations" element={<ClubRegistrations />} />
         {/* Shared */}
         <Route
           path="/notifications"

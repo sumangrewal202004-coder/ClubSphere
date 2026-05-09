@@ -8,18 +8,23 @@ export default function Notifications() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+  let mounted = true;
 
+  const fetch = () =>
     api.get('/notifications')
-      .then(res => {
-        if (mounted) setData(res.data);
-      })
+      .then(res => { if (mounted) setData(res.data); })
       .catch(() => setError('Failed to load notifications'))
       .finally(() => setLoading(false));
 
-    return () => (mounted = false);
-  }, []);
+  fetch(); // initial load
 
+  const interval = setInterval(fetch, 30000); // ✅ poll every 30s
+
+  return () => {
+    mounted = false;
+    clearInterval(interval); // ✅ cleanup
+  };
+}, []);
   const markAllRead = async () => {
     if (updating) return;
 
