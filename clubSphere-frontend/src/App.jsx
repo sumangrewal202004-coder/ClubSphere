@@ -1,7 +1,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/Protectedroute';
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import './App.css';
 
@@ -15,18 +15,18 @@ import ChooseRole from './pages/ChooseRole';
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 // College
-import CollegeDashboard from './pages/college/Collegedashboard';
-import CreateClub from './pages/college/Createclub';
+import CollegeDashboard from './pages/college/CollegeDashboard';
+import CreateClub from './pages/college/CreateClub';
 
 // Manager
-import ManagerDashboard from './pages/manager/Managerdashboard';
-import ApplicationsReview from './pages/manager/Applicationsreview';
-import CreateEvent from './pages/manager/Createevent';
+import ManagerDashboard from './pages/manager/ManagerDashboard';
+import ApplicationsReview from './pages/manager/ApplicationsReview';
+import CreateEvent from './pages/manager/CreateEvent';
 
 // Student
-import BrowseClubs from './pages/student/Browseclubs';
-import MyApplications from './pages/student/Myapplications';
-import StudentEvents from './pages/student/Studentevents';
+import BrowseClubs from './pages/student/BrowseClubs';
+import MyApplications from './pages/student/MyApplications';
+import StudentEvents from './pages/student/StudentEvents';
 
 // 🔥 Wrapper to control Navbar
 function Layout() {
