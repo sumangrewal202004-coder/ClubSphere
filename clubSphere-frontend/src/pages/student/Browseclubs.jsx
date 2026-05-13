@@ -1,19 +1,383 @@
+// // // import { useEffect, useState } from 'react';
+// // // import api from '../../api/axios';
+// // // import ApplyModal from '../../components/ApplyModal';
+
+// // // export default function BrowseClubs() {
+// // //   const [clubs, setClubs] = useState([]);
+// //  const [appliedClubIds, setAppliedClubIds] = useState([]);
+// // //   const [loading, setLoading] = useState(true);
+// // //   const [selectedClub, setSelectedClub] = useState(null);
+// // //   const [search, setSearch] = useState('');
+// // //   const [error, setError] = useState('');
+
+// // useEffect(() => {
+// //     const fetchData = async () => {
+// //       try {
+// //         const [clubsRes, appsRes] = await Promise.all([
+// //           api.get('/clubs'),
+// //           isManager ? Promise.resolve({ data: [] }) : api.get('/applications/mine')
+// //         ]);
+// //         setClubs(clubsRes.data);
+// //         setAppliedClubIds(appsRes.data.map(a => a.club_id)); // ✅ store applied club ids
+// //       } catch {
+// //         setError('Failed to load clubs');
+// //       } finally {
+// //         setLoading(false);
+// //       }
+// //     };
+// //     fetchData();
+// //   }, []);
+
+// // //   const filtered = clubs.filter(c =>
+// // //     c.name.toLowerCase().includes(search.toLowerCase()) ||
+// // //     (c.description || '').toLowerCase().includes(search.toLowerCase())
+// // //   );
+
+// // //   return (
+// // //     <div key={club.id} style={{ ...card, position: 'relative' }}>
+
+// //                   {/* ✅ Applied badge top right corner */}
+// //                   {hasApplied && (
+// //                     <div style={appliedBadge}>✓ Applied</div>
+// //                   )}
+// // //       <div style={container}>
+
+// // //         <div style={header}>
+// // //           <h1 style={title}>Browse Clubs</h1>
+// // //           <p style={subtitle}>Find a club and apply with your CV</p>
+// // //         </div>
+
+// // //         {error && <div style={errorBox}>{error}</div>}
+
+// // //         {/* SEARCH */}
+// // //         <input
+// // //           value={search}
+// // //           onChange={e => setSearch(e.target.value)}
+// // //           placeholder="Search clubs..."
+// // //           style={input}
+// // //         />
+
+// // //         {loading ? (
+// // //           <div style={empty}>Loading clubs...</div>
+// // //         ) : filtered.length === 0 ? (
+// // //           <div style={empty}>No clubs found</div>
+// // //         ) : (
+// // //           <div style={grid}>
+// // //             {filtered.map(club => (
+// // //               <div key={club.id} style={card}>
+
+// // //                 <h3 style={cardTitle}>{club.name}</h3>
+// // //                 <p style={college}>{club.college_name}</p>
+
+// // //                 <p style={desc}>{club.description}</p>
+
+// // //                 {club.requirements && (
+// // //                   <div style={reqBox}>
+// // //                     <p style={reqTitle}>What they look for</p>
+// // //                     <p style={reqText}>{club.requirements}</p>
+// // //                   </div>
+// // //                 )}
+
+// // //                 <button
+// // //                   onClick={() => setSelectedClub(club)}
+// // //                   style={primaryBtn}
+// // //                 >
+// // //                   Apply Now
+// // //                 </button>
+
+// // //               </div>
+// // //             ))}
+// // //           </div>
+// // //         )}
+// // //       </div>
+
+// // //       {selectedClub && (
+// // //         <ApplyModal club={selectedClub} onClose={() => setSelectedClub(null)} />
+// // //       )}
+// // //     </div>
+// // //   );
+// // // }
+
+// // // /* styles */
+// // // const page = { background: '#0a0a0f', minHeight: '100vh', color: '#e8e8f0', padding: '2rem' };
+// // // const container = { maxWidth: '1100px', margin: '0 auto' };
+// // // const header = { marginBottom: '1.5rem' };
+// // // const title = { fontSize: '2rem', fontWeight: 700 };
+// // // const subtitle = { color: '#7a7a96' };
+
+// // // const input = {
+// // //   padding: '12px',
+// // //   width: '100%',
+// // //   maxWidth: '400px',
+// // //   marginBottom: '1.5rem',
+// // //   borderRadius: '10px',
+// // //   background: 'rgba(255,255,255,0.05)',
+// // //   border: '1px solid rgba(255,255,255,0.1)',
+// // //   color: '#fff'
+// // // };
+
+// // // const grid = { display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))' };
+
+// // // const card = {
+// // //   padding: '1.5rem',
+// // //   borderRadius: '16px',
+// // //   background: 'rgba(255,255,255,0.04)',
+// // //   border: '1px solid rgba(255,255,255,0.08)'
+// // // };
+
+// // // const cardTitle = { fontWeight: 600, fontSize: '1.1rem' };
+// // // const college = { fontSize: '0.8rem', color: '#6366f1', marginBottom: '8px' };
+// // // const desc = { color: '#7a7a96', fontSize: '0.9rem', marginBottom: '10px' };
+
+// // // const reqBox = { background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '10px', marginBottom: '10px' };
+// // // const reqTitle = { fontSize: '0.75rem', color: '#a5a5c2' };
+// // // const reqText = { fontSize: '0.8rem', color: '#7a7a96' };
+
+// // // const primaryBtn = {
+// // //   marginTop: '10px',
+// // //   width: '100%',
+// // //   padding: '10px',
+// // //   borderRadius: '10px',
+// // //   background: '#6366f1',
+// // //   color: '#fff',
+// // //   border: 'none',
+// // //   cursor: 'pointer'
+// // // };
+
+// // // const empty = { textAlign: 'center', padding: '3rem', color: '#7a7a96' };
+// // // const errorBox = { color: '#f87171', marginBottom: '10px' };
+
+// import { useEffect, useState } from 'react';
+// import api from '../../api/axios';
+// import ApplyModal from '../../components/ApplyModal';
+// import { useAuth } from '../../context/AuthContext';
+
+// export default function BrowseClubs() {
+//   const { user } = useAuth();
+//   const [clubs, setClubs] = useState([]);
+//   const [appliedClubIds, setAppliedClubIds] = useState([]); // ✅ track applied clubs
+//   const [loading, setLoading] = useState(true);
+//   const [selectedClub, setSelectedClub] = useState(null);
+//   const [search, setSearch] = useState('');
+//   const [error, setError] = useState('');
+
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         const [clubsRes, appsRes] = await Promise.all([
+//           api.get('/clubs'),
+//           isManager ? Promise.resolve({ data: [] }) : api.get('/applications/mine')
+//         ]);
+//         setClubs(clubsRes.data);
+//         setAppliedClubIds(appsRes.data.map(a => a.club_id)); // ✅ store applied club ids
+//       } catch {
+//         setError('Failed to load clubs');
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchData();
+//   }, []);
+
+//   const filtered = clubs.filter(c =>
+//     c.name.toLowerCase().includes(search.toLowerCase()) ||
+//     (c.description || '').toLowerCase().includes(search.toLowerCase())
+//   );
+
+//   return (
+//     <div style={page}>
+//       <div style={container}>
+
+//         <div style={header}>
+//           <h1 style={title}>Browse Clubs</h1>
+//           <p style={subtitle}>Find a club and apply with your CV</p>
+//         </div>
+
+//         {error && <div style={errorBox}>{error}</div>}
+
+//         <input
+//           value={search}
+//           onChange={e => setSearch(e.target.value)}
+//           placeholder="Search clubs..."
+//           style={input}
+//         />
+
+//         {loading ? (
+//           <div style={empty}>Loading clubs...</div>
+//         ) : filtered.length === 0 ? (
+//           <div style={empty}>No clubs found</div>
+//         ) : (
+//           <div style={grid}>
+//             {filtered.map(club => {
+//               const hasApplied = appliedClubIds.includes(club.id);
+
+//               return (
+//                 <div key={club.id} style={{ ...card, position: 'relative' }}>
+
+//                   {/* ✅ Applied badge top right corner */}
+//                   {hasApplied && (
+//                     <div style={appliedBadge}>✓ Applied</div>
+//                   )}
+
+//                   <h3 style={cardTitle}>{club.name}</h3>
+//                   <p style={college}>{club.college_name}</p>
+//                   <p style={desc}>{club.description}</p>
+
+//                   {club.requirements && (
+//                     <div style={reqBox}>
+//                       <p style={reqTitle}>What they look for</p>
+//                       <p style={reqText}>{club.requirements}</p>
+//                     </div>
+//                   )}
+
+//                   {/* ✅ show correct button based on role/status */}
+//                 {hasApplied ? (
+//   null  // badge already shows in top right corner
+// ) : (
+//   <button onClick={() => setSelectedClub(club)} style={primaryBtn}>
+//     Apply Now
+//   </button>
+// )}
+
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         )}
+//       </div>
+
+//       {selectedClub && (
+//         <ApplyModal
+//           club={selectedClub}
+//           onClose={() => setSelectedClub(null)}
+//           onSuccess={(clubId) => {
+//             setAppliedClubIds(prev => [...prev, clubId]); // ✅ update instantly after applying
+//             setSelectedClub(null);
+//           }}
+//         />
+//       )}
+//     </div>
+//   );
+// }
+
+// /* styles */
+// const page = { background: '#0a0a0f', minHeight: '100vh', color: '#e8e8f0', padding: '2rem' };
+// const container = { maxWidth: '1100px', margin: '0 auto' };
+// const header = { marginBottom: '1.5rem' };
+// const title = { fontSize: '2rem', fontWeight: 700 };
+// const subtitle = { color: '#7a7a96' };
+
+// const input = {
+//   padding: '12px',
+//   width: '100%',
+//   maxWidth: '400px',
+//   marginBottom: '1.5rem',
+//   borderRadius: '10px',
+//   background: 'rgba(255,255,255,0.05)',
+//   border: '1px solid rgba(255,255,255,0.1)',
+//   color: '#fff'
+// };
+
+// const grid = { display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))' };
+
+// const card = {
+//   padding: '1.5rem',
+//   borderRadius: '16px',
+//   background: 'rgba(255,255,255,0.04)',
+//   border: '1px solid rgba(255,255,255,0.08)'
+// };
+
+// const cardTitle = { fontWeight: 600, fontSize: '1.1rem' };
+// const college = { fontSize: '0.8rem', color: '#6366f1', marginBottom: '8px' };
+// const desc = { color: '#7a7a96', fontSize: '0.9rem', marginBottom: '10px' };
+
+// const reqBox = { background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '10px', marginBottom: '10px' };
+// const reqTitle = { fontSize: '0.75rem', color: '#a5a5c2' };
+// const reqText = { fontSize: '0.8rem', color: '#7a7a96' };
+
+// const primaryBtn = {
+//   marginTop: '10px',
+//   width: '100%',
+//   padding: '10px',
+//   borderRadius: '10px',
+//   background: '#6366f1',
+//   color: '#fff',
+//   border: 'none',
+//   cursor: 'pointer'
+// };
+
+// const appliedBtn = {
+//   marginTop: '10px',
+//   width: '100%',
+//   padding: '10px',
+//   borderRadius: '10px',
+//   background: 'rgba(52,211,153,0.1)',
+//   border: '1px solid rgba(52,211,153,0.25)',
+//   color: '#34d399',
+//   textAlign: 'center',
+//   fontSize: '0.9rem'
+// };
+
+// const appliedBadge = {
+//   position: 'absolute',
+//   top: '12px',
+//   right: '12px',
+//   background: 'rgba(52,211,153,0.15)',
+//   border: '1px solid rgba(52,211,153,0.3)',
+//   color: '#34d399',
+//   fontSize: '0.72rem',
+//   fontWeight: 600,
+//   padding: '3px 10px',
+//   borderRadius: '999px'
+// };
+
+// const managerNote = {
+//   marginTop: '10px',
+//   width: '100%',
+//   padding: '10px',
+//   borderRadius: '10px',
+//   background: 'rgba(255,255,255,0.03)',
+//   border: '1px solid rgba(255,255,255,0.08)',
+//   color: '#4a4a6a',
+//   fontSize: '0.85rem',
+//   textAlign: 'center'
+// };
+
+// const empty = { textAlign: 'center', padding: '3rem', color: '#7a7a96' };
+// // const errorBox = { color: '#f87171', marginBottom: '10px' };
+
+
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
 import ApplyModal from '../../components/ApplyModal';
+import { useAuth } from '../../context/AuthContext';
 
 export default function BrowseClubs() {
+  const { user } = useAuth();
   const [clubs, setClubs] = useState([]);
+  const [appliedClubIds, setAppliedClubIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClub, setSelectedClub] = useState(null);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/clubs')
-      .then(res => setClubs(res.data))
-      .catch(() => setError('Failed to load clubs'))
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        const [clubsRes, appsRes] = await Promise.all([
+          api.get('/clubs'),
+          api.get('/applications/mine')
+        ]);
+        setClubs(clubsRes.data);
+        setAppliedClubIds(appsRes.data.map(a => a.club_id));
+      } catch {
+        setError('Failed to load clubs');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const filtered = clubs.filter(c =>
@@ -23,7 +387,6 @@ export default function BrowseClubs() {
 
   return (
     <div style={page}>
-
       <div style={container}>
 
         <div style={header}>
@@ -33,7 +396,6 @@ export default function BrowseClubs() {
 
         {error && <div style={errorBox}>{error}</div>}
 
-        {/* SEARCH */}
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -47,36 +409,49 @@ export default function BrowseClubs() {
           <div style={empty}>No clubs found</div>
         ) : (
           <div style={grid}>
-            {filtered.map(club => (
-              <div key={club.id} style={card}>
+            {filtered.map(club => {
+              const hasApplied = appliedClubIds.includes(club.id);
 
-                <h3 style={cardTitle}>{club.name}</h3>
-                <p style={college}>{club.college_name}</p>
+              return (
+                <div key={club.id} style={{ ...card, position: 'relative' }}>
 
-                <p style={desc}>{club.description}</p>
+                  {hasApplied && (
+                    <div style={appliedBadge}>✓ Applied</div>
+                  )}
 
-                {club.requirements && (
-                  <div style={reqBox}>
-                    <p style={reqTitle}>What they look for</p>
-                    <p style={reqText}>{club.requirements}</p>
-                  </div>
-                )}
+                  <h3 style={cardTitle}>{club.name}</h3>
+                  <p style={college}>{club.college_name}</p>
+                  <p style={desc}>{club.description}</p>
 
-                <button
-                  onClick={() => setSelectedClub(club)}
-                  style={primaryBtn}
-                >
-                  Apply Now
-                </button>
+                  {club.requirements && (
+                    <div style={reqBox}>
+                      <p style={reqTitle}>What they look for</p>
+                      <p style={reqText}>{club.requirements}</p>
+                    </div>
+                  )}
 
-              </div>
-            ))}
+                  {!hasApplied && (
+                    <button onClick={() => setSelectedClub(club)} style={primaryBtn}>
+                      Apply Now
+                    </button>
+                  )}
+
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       {selectedClub && (
-        <ApplyModal club={selectedClub} onClose={() => setSelectedClub(null)} />
+        <ApplyModal
+          club={selectedClub}
+          onClose={() => setSelectedClub(null)}
+          onSuccess={(clubId) => {
+            setAppliedClubIds(prev => [...prev, clubId]);
+            setSelectedClub(null);
+          }}
+        />
       )}
     </div>
   );
@@ -88,6 +463,7 @@ const container = { maxWidth: '1100px', margin: '0 auto' };
 const header = { marginBottom: '1.5rem' };
 const title = { fontSize: '2rem', fontWeight: 700 };
 const subtitle = { color: '#7a7a96' };
+const errorBox = { color: '#f87171', marginBottom: '10px' };
 
 const input = {
   padding: '12px',
@@ -128,5 +504,17 @@ const primaryBtn = {
   cursor: 'pointer'
 };
 
+const appliedBadge = {
+  position: 'absolute',
+  top: '12px',
+  right: '12px',
+  background: 'rgba(52,211,153,0.15)',
+  border: '1px solid rgba(52,211,153,0.3)',
+  color: '#34d399',
+  fontSize: '0.72rem',
+  fontWeight: 600,
+  padding: '3px 10px',
+  borderRadius: '999px'
+};
+
 const empty = { textAlign: 'center', padding: '3rem', color: '#7a7a96' };
-const errorBox = { color: '#f87171', marginBottom: '10px' };

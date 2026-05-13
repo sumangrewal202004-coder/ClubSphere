@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import api from '../api/axios';
 
-export default function ApplyModal({ club, onClose }) {
+export default function ApplyModal({ club, onClose, onSuccess }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -38,7 +38,9 @@ export default function ApplyModal({ club, onClose }) {
       await api.post('/applications', formData); // ✅ correct (no headers)
 
       setSuccess(true);
-
+setTimeout(() => {
+  onSuccess(club.id); // ✅ notify parent with clubId
+}, 1500);
       // 🔥 Auto close after success
       setTimeout(() => {
         handleClose();

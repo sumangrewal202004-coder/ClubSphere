@@ -768,17 +768,19 @@ export default function AdminDashboard() {
                     {docsOpen[college.id] ? 'Hide Documents' : 'View Documents'}
                   </button>
 
-                  <button 
-                    onClick={() => deleteCollege(college.id)}
-                    className="btn btn-secondary"
-                    style={{ 
-                      background: '#2a1f2f', 
-                      color: '#f87171', 
-                      borderColor: '#450a0a' 
-                    }}
-                  >
-                    Delete College
-                  </button>
+                 {college.status === 'rejected' && (
+  <button 
+    onClick={() => deleteCollege(college.id)}
+    className="btn btn-secondary"
+    style={{ 
+      background: '#2a1f2f', 
+      color: '#f87171', 
+      borderColor: '#450a0a' 
+    }}
+  >
+    Delete College
+  </button>
+)}
                 </div>
 
                 {/* Documents Panel */}

@@ -41,10 +41,10 @@ exports.applyToClub = async (req, res) => {
  
     // Save application first
     const application = await db.query(
-      `INSERT INTO applications (student_id, club_id, cv_path)
-       VALUES ($1, $2, $3) RETURNING *`,
-      [req.user.id, clubId, req.file.path]
-    );
+  `INSERT INTO applications (student_id, club_id, cv_path)
+   VALUES ($1, $2, $3) RETURNING *`,
+  [req.user.id, clubId, req.file.location]  // ✅ .location is the S3 URL
+);
  
     const appData = application.rows[0];
  
@@ -63,9 +63,9 @@ try {
   const requirements = club.rows[0]?.requirements || '';
 
   // ✅ fetch PDF from Cloudinary URL instead of reading from disk
-  const axios = require('axios');
-  const response = await axios.get(req.file.path, { responseType: 'arraybuffer' });
-  const fileBuffer = Buffer.from(response.data);
+ const axios = require('axios');
+const response = await axios.get(req.file.location, { responseType: 'arraybuffer' });
+const fileBuffer = Buffer.from(response.data);
   const pdfData = await pdfParse(fileBuffer);
   const cvText = pdfData.text;
 
@@ -97,6 +97,7 @@ exports.getMyApplications = async (req, res) => {
     const result = await db.query(
       `SELECT 
         a.id,
+        a.club_id,
         c.name AS club_name,
         c.description AS club_description,
         a.status,

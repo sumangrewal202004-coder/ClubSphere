@@ -8,9 +8,9 @@ export default function ClubRegistrations() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expanded, setExpanded] = useState({}); // ✅ track which events are expanded
 
   useEffect(() => {
-    // fetch all events for this club, then fetch registrations for each
     api.get(`/events/club/${clubId}`)
       .then(async res => {
         const eventsWithRegs = await Promise.all(
@@ -28,6 +28,10 @@ export default function ClubRegistrations() {
       .catch(() => setError('Failed to load registrations'))
       .finally(() => setLoading(false));
   }, [clubId]);
+
+  const toggleExpand = (eventId) => {
+    setExpanded(prev => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
 
   return (
     <div style={page}>
@@ -50,51 +54,73 @@ export default function ClubRegistrations() {
           <div style={emptyCard}>No events found for this club</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {events.map(event => (
-              <div key={event.id} style={card}>
+            {events.map(event => {
+              const count = event.registrations.length;
+              const isOpen = expanded[event.id];
 
-                {/* EVENT INFO */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>
-                    {event.title}
-                  </h3>
-                  <div style={{ fontSize: '0.82rem', color: '#7a7a96' }}>
-                    📅 {new Date(event.event_date).toLocaleDateString()}{' '}
-                    {new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    {event.venue && <span> &nbsp;📍 {event.venue}</span>}
-                  </div>
-                </div>
+              return (
+                <div key={event.id} style={card}>
 
-                {/* REGISTRATIONS */}
-                {event.registrations.length === 0 ? (
-                  <div style={noRegs}>No registrations yet</div>
-                ) : (
-                  <>
-                    <div style={regCount}>
-                      {event.registrations.length} student{event.registrations.length !== 1 ? 's' : ''} registered
+                  {/* EVENT INFO */}
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>
+                      {event.title}
+                    </h3>
+                    <div style={{ fontSize: '0.82rem', color: '#7a7a96' }}>
+                      📅 {new Date(event.event_date).toLocaleDateString()}{' '}
+                      {new Date(event.event_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {event.venue && <span> &nbsp;📍 {event.venue}</span>}
                     </div>
-                    <table style={table}>
-                      <thead>
-                        <tr>
-                          <th style={th}>Name</th>
-                          <th style={th}>Email</th>
-                          <th style={th}>Registered At</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {event.registrations.map((r, i) => (
-                          <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                            <td style={td}>{r.name}</td>
-                            <td style={td}>{r.email}</td>
-                            <td style={td}>{new Date(r.registered_at).toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </>
-                )}
-              </div>
-            ))}
+                  </div>
+
+                  {/* REGISTRATION COUNT + TOGGLE */}
+                  {count === 0 ? (
+                    <div style={noRegs}>No registrations yet</div>
+                  ) : (
+                    <>
+                      {/* ✅ summary row */}
+                      <div style={summaryRow}>
+                        <div style={regCount}>
+                          👥 {count} student{count !== 1 ? 's' : ''} registered
+                        </div>
+                        <button
+                          onClick={() => toggleExpand(event.id)}
+                          style={toggleBtn}
+                        >
+                          {isOpen ? 'Hide Students ▲' : 'View Students ▼'}
+                        </button>
+                      </div>
+
+                      {/* ✅ collapsible table */}
+                      {isOpen && (
+                        <div style={{ marginTop: '1rem' }}>
+                          <table style={table}>
+                            <thead>
+                              <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                <th style={th}>#</th>
+                                <th style={th}>Name</th>
+                                <th style={th}>Email</th>
+                                <th style={th}>Registered At</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {event.registrations.map((r, i) => (
+                                <tr key={i} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                  <td style={{ ...td, color: '#4a4a6a' }}>{i + 1}</td>
+                                  <td style={td}>{r.name}</td>
+                                  <td style={{ ...td, color: '#7a7a96' }}>{r.email}</td>
+                                  <td style={{ ...td, color: '#7a7a96' }}>{new Date(r.registered_at).toLocaleString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -112,7 +138,18 @@ const emptyCard = { textAlign: 'center', padding: '3rem', borderRadius: '16px', 
 const errorBox = { color: '#f87171', marginBottom: '1rem' };
 const card = { padding: '1.5rem', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' };
 const noRegs = { color: '#4a4a6a', fontSize: '0.85rem', fontStyle: 'italic' };
-const regCount = { fontSize: '0.8rem', color: '#6366f1', marginBottom: '10px' };
+const summaryRow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' };
+const regCount = { fontSize: '0.9rem', color: '#6366f1', fontWeight: 600 };
+const toggleBtn = {
+  padding: '6px 14px',
+  borderRadius: '8px',
+  background: 'rgba(99,102,241,0.1)',
+  border: '1px solid rgba(99,102,241,0.25)',
+  color: '#818cf8',
+  fontSize: '0.82rem',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap'
+};
 const backBtn = { padding: '8px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#cfcfe8', cursor: 'pointer' };
 const table = { width: '100%', borderCollapse: 'collapse' };
 const th = { textAlign: 'left', padding: '8px 12px', fontSize: '0.78rem', color: '#6a6888', textTransform: 'uppercase', letterSpacing: '0.5px' };

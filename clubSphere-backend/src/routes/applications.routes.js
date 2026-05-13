@@ -7,11 +7,7 @@ const {
   getMyApplications
 } = require('../controllers/applications.controller');
  
-// Student submits application with CV
+router.get('/mine', auth(['student', 'club_manager']), getMyApplications);
 router.post('/', auth(['student', 'club_manager']), upload.single('cv'), applyToClub);
- 
-// Student views their own application history
-router.get('/mine', auth(['student']), getMyApplications);
- 
 module.exports = router;
  
