@@ -606,7 +606,7 @@ export default function CollegeDashboard() {
           padding: 20px;
           animation: fadeIn 0.2s ease;
         }
-
+                                                           
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
 
