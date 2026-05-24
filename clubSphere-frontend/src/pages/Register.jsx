@@ -213,12 +213,12 @@ const ROLES = [
     desc: 'Browse clubs, apply with your CV, register for events',
     icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l6.16-3.422A12.083 12.083 0 0121 13c0 2.955-1.01 5.674-2.68 7.81A11.95 11.95 0 0112 23a11.95 11.95 0 01-6.32-2.19A12.037 12.037 0 013 13c.59-.572 1.99-1.145 3.84-2.422L12 14z"/></svg>,
   },
-  {
-    value: 'club_manager',
-    label: 'Club Manager',
-    desc: 'Review student applications, manage members, post events',
-    icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-5.197-3.787M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a4 4 0 015.197-3.787M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
-  },
+  // {
+  //   value: 'club_manager',
+  //   label: 'Club Manager',
+  //   desc: 'Review student applications, manage members, post events',
+  //   icon: <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a4 4 0 00-5.197-3.787M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a4 4 0 015.197-3.787M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
+  // },
   {
     value: 'college',
     label: 'College',

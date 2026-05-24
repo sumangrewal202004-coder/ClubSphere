@@ -5,7 +5,7 @@ require('dotenv').config();
  
 const app = express();
 const db = require('./src/config/db');
- 
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use(cors({
   origin: [
     'http://localhost:5173',
