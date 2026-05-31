@@ -47,7 +47,14 @@ function Layout() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/choose-role" element={<ChooseRole />} />
-<Route path="/manager/clubs/:clubId/registrations" element={<ClubRegistrations />} />
+<Route
+  path="/manager/clubs/:clubId/registrations"
+  element={
+    <ProtectedRoute roles={['club_manager']}>
+      <ClubRegistrations />
+    </ProtectedRoute>
+  }
+/>
         {/* Shared */}
         <Route
           path="/notifications"
